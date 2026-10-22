@@ -1,20 +1,98 @@
-# library
+<div align="center">
 
-**Live site:** [AR Smart Library — 24-hour reading library in Namkum, Ranchi](https://shogun-support-99.github.io/library/) · [skills](#contents)
+<img src="site/assets/og-image.png" alt="AR Smart Library — open 24 hours at Sadabahar Chowk, Namkum, Ranchi" width="100%">
 
-Agent **skills for AI coding agents** (design and frontend), vendored at their upstream payload, unmodified, with the source commit recorded so they can be audited or re-synced. The website for AR Smart Library lives in [`site/`](site/) and deploys from this repository.
+# AR Smart Library
 
-**9 skills from 3 upstream repos.** All are frontend/design oriented; they overlap in intent and are meant to be mixed, not installed as one system.
+**A 24-hour reading library at Sadabahar Chowk, Namkum, Ranchi — and the site that says so.**
 
-## The site
+[![Vercel](https://img.shields.io/badge/vercel-live-4f6238?style=flat-square)](https://arsmartlibrary-psi.vercel.app/)
+[![GitHub Pages](https://img.shields.io/badge/github%20pages-live-2a2a26?style=flat-square)](https://shogun-support-99.github.io/library/)
+[![Deploy](https://img.shields.io/github/actions/workflow/status/shogun-support-99/library/pages.yml?branch=main&style=flat-square&label=deploy)](https://github.com/shogun-support-99/library/actions/workflows/pages.yml)
 
-[![AR Smart Library — open 24 hours, Sadabahar Chowk, Namkum](https://img.shields.io/badge/live-AR%20Smart%20Library-4f6238?style=for-the-badge)](https://shogun-support-99.github.io/library/)
+</div>
 
-A single static page for a 24-hour reading library at Sadabahar Chowk, Namkum, Ranchi, built on the sentence *"AR Smart Library is open at ⟨time⟩"* with the time **live in the headline**. No build step, no dependencies, no tracking, self-hosted typeface.
+---
 
-Every push to `main` redeploys it automatically via [`.github/workflows/pages.yml`](.github/workflows/pages.yml), so there is no manual deploy step to remember. What the page says and how to edit it: [`site/README.md`](site/README.md).
+The library never closes. The site's headline says so with a live clock — *"AR Smart Library is open
+at ⟨time⟩"*, ticked to Asia/Kolkata — so the central promise is shown rather than claimed.
 
-## Contents
+Seven pages, one shared design system, no framework, no client-side router, no cookies, no third-party scripts.
+Every fact on it comes from public business listings checked on 6 October 2026, and where a detail
+could not be confirmed it is left out rather than filled in.
+
+| | URL | Serves from |
+| :--- | :--- | :--- |
+| **Vercel** | <https://arsmartlibrary-psi.vercel.app/> | the domain root, `/` |
+| **GitHub Pages** | <https://shogun-support-99.github.io/library/> | a sub-path, `/library/` |
+
+The same `src/` builds both. Only `SITE_URL` and `BASE_PATH` differ, so canonicals, Open Graph tags,
+the sitemap and every internal link are correct on each host. Both redeploy automatically on every
+push to `main` — there is no manual deploy step to remember.
+
+## The pages
+
+| Page | Job |
+| :--- | :--- |
+| [`index`](site/src/pages/index.html) | The clock, the four facts, the ratings, and the way into the rest |
+| [`about`](site/src/pages/about.html) | The story, who the room is for, and the rules this site writes by |
+| [`facilities`](site/src/pages/facilities.html) | What is confirmed, what is not, and six questions to ask before travelling |
+| [`membership`](site/src/pages/membership.html) | Why no prices are printed, and how the call goes |
+| [`location`](site/src/pages/location.html) | The address, a drawn schematic of the chowk, hours, and what to tell an auto driver |
+| [`faq`](site/src/pages/faq.html) | Seven short answers |
+| [`contact`](site/src/pages/contact.html) | The one published route in |
+
+## What this site refuses to do
+
+These are content rules, not preferences. They are enforced by review, and they are why some pages
+look sparse next to a competitor's.
+
+- **No prices.** A rate quoted two years ago can be wrong in both directions. Membership sends people to the phone.
+- **No unverified facilities.** Air conditioning, Wi-Fi, lockers, CCTV, parking, power backup, washrooms, private cabins, charging points and seat booking are named as *unconfirmed* — not claimed, not quietly omitted.
+- **No WhatsApp CTA**, because no messaging route is confirmed. A dead link is not a service.
+- **No copied reviews.** The scores are cited; the words belong to the people who wrote them, so they are linked.
+- **No fake photographs.** None were supplied, and a stock reading room would be a lie — the picture slot holds the live clock and a drawn map instead.
+- The ratings disclaimer stays: *taken on 6 October 2026 and can change.*
+
+## Stack
+
+- **Tailwind CSS v4** — configuration in CSS (`@theme`), not a JS config file: palette, five type steps, easings and `animate-*` tokens all become utilities.
+- **A Node build script** (`site/build.mjs`) — front matter, includes, JSON-LD, sitemap, Tailwind CLI. No framework, no bundler.
+- **Vanilla `app.js`** — the clock, rolling figures, scroll reveals, header state, menu. Decides *when* motion happens; Tailwind defines *what* it is.
+- **Self-hosted typeface**, four woff2 files. No font CDN, no cookies, no third-party scripts.
+
+## Run it locally
+
+```bash
+cd site
+npm ci
+npm run dev      # build, then rebuild on src/ changes
+npm run serve    # in another shell — http://localhost:8080
+```
+
+Full detail — the front-matter format, the token map, the motion layer, every bug found and fixed —
+is in [`site/README.md`](site/README.md).
+
+## Verified, not assumed
+
+Measured in headless Chromium against the built `dist/` at 1440, 768 and 390:
+
+- **axe-core: 0 violations** on all seven pages at all three widths (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, best-practice)
+- 0 console errors, 0 failed requests, 0 horizontal overflow
+- one `<h1>` per page, two JSON-LD blocks per page, canonical + description everywhere
+- complete without JavaScript, and with `prefers-reduced-motion` (0 running animations, nothing hidden)
+
+Not claimed: there are no photographs of the library, and page transitions are progressive enhancement
+only, for browsers that implement `@view-transition`.
+
+---
+
+## What else is here: nine agent skills
+
+The site above was built with these. They are design and frontend skills for AI coding agents,
+vendored at their upstream payload, unmodified, with the source commit recorded so they can be
+audited or re-synced — nine skills from three upstream repositories. They overlap in intent and are
+meant to be mixed, not installed as one system.
 
 ### impeccable — [pbakaus/impeccable](https://github.com/pbakaus/impeccable) · v4.7.0 · Apache-2.0
 
@@ -42,7 +120,7 @@ commit `623a9a9` · one upstream repo shipping seven skills, vendored flat so ea
 | **banner-design** | [`skills/banner-design/`](skills/banner-design/) | Banners for social, ads, heroes and print; 22 styles across platform-specific sizes. |
 | **slides** | [`skills/slides/`](skills/slides/) | HTML presentations with Chart.js, design tokens and responsive layouts. |
 
-## Install
+## Installing a skill
 
 Link a skill into your agent's skill directory:
 
