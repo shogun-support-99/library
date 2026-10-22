@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="AR Smart Library">
+  <rect width="64" height="64" rx="6" fill="#4f6238"/>
+  <text x="32" y="43" text-anchor="middle"
+        font-family="Schibsted Grotesk, Helvetica, Arial, sans-serif"
+        font-size="27" font-weight="800" letter-spacing="-1.6" fill="#f7f4ea">AR</text>
+</svg>

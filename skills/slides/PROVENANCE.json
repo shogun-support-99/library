@@ -1,0 +1,11 @@
+{
+  "name": "slides",
+  "upstream": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git",
+  "commit": "623a9a9037d006ea727f8213f084d02a6b6f11b5",
+  "bundle": "UI/UX Pro Max",
+  "bundle_version": "2.15.0",
+  "downloaded": "2026-10-22",
+  "vendored_from": ".claude/skills/slides",
+  "license": "MIT",
+  "notes": "One of seven skills shipped by this upstream repo; vendored flat so it installs as its own skill. Upstream also ships a subset copy under cli/assets/skills (omits ui-styling/canvas-fonts and ui-ux-pro-max) - the .claude/skills payload is canonical and is what is vendored here."
+}

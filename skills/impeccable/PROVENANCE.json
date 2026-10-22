@@ -1,0 +1,11 @@
+{
+  "name": "impeccable",
+  "upstream": "https://github.com/pbakaus/impeccable.git",
+  "commit": "8644175285360c166e57b1e35ecadfbc85ff5209",
+  "skill_version": "4.7.0",
+  "engine_version": "0.1.16",
+  "downloaded": "2026-10-22",
+  "vendored_from": ".agents/skills/impeccable",
+  "license": "Apache-2.0",
+  "notes": "Upstream ships ~20 byte-identical per-agent copies (.claude, .cursor, .gemini, plugin/, cursor-plugin/, etc.). Only the canonical .agents payload is vendored here; the others differ solely in frontmatter and fallback paths."
+}
