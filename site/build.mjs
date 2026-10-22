@@ -21,7 +21,13 @@ import process from "node:process";
 const root = process.cwd();
 const srcDir = path.join(root, "src");
 const distDir = path.join(root, "dist");
-const SITE = "https://shogun-support-99.github.io/library/";
+/* The same source builds for two hosts. GitHub Pages serves the site from a
+   /library/ sub-path, Vercel serves it from the domain root, so the base and
+   the canonical host come from the environment. Defaults stay on GitHub Pages.
+
+     SITE_URL=https://arsmartlibrary.vercel.app/ BASE_PATH=/ npm run build */
+const SITE = (process.env.SITE_URL || "https://shogun-support-99.github.io/library/").replace(/\/?$/, "/");
+const BASE = (process.env.BASE_PATH || "/library/").replace(/^(?!\/)/, "/").replace(/\/?$/, "/");
 const watchMode = process.argv.includes("--watch");
 
 /* ------------------------------------------------------------ front matter */
@@ -78,6 +84,7 @@ const NAV = [
 const NAMES = Object.fromEntries(NAV.concat([["index", "Home"]]));
 
 function canonical(slug) {
+  // SITE always has a trailing slash and BASE is where the site is mounted
   return slug === "index" ? SITE : `${SITE}${slug}.html`;
 }
 
@@ -133,7 +140,11 @@ function jsonld(meta, slug) {
 function paint(html, meta, slug) {
   const current = slug === "index" ? "index" : slug;
 
-  html = html.replaceAll("{{URL}}", canonical(slug)).replaceAll("{{JSONLD}}", jsonld(meta, slug));
+  html = html
+    .replaceAll("{{URL}}", canonical(slug))
+    .replaceAll("{{JSONLD}}", jsonld(meta, slug))
+    .replaceAll("{{ROOT}}", BASE)
+    .replaceAll("{{OG_IMAGE}}", `${SITE}assets/og-image.png`);
 
   // every front-matter key is a token: {{TITLE}}, {{CLOSE}}, and so on
   for (const [key, value] of Object.entries(meta)) {
@@ -185,9 +196,35 @@ async function build() {
   );
 
   await cp(path.join(root, "assets"), path.join(distDir, "assets"), { recursive: true });
-  for (const f of ["robots.txt", "sitemap.xml", "site.webmanifest", "app.js"]) {
+  for (const f of ["site.webmanifest", "app.js"]) {
     await cp(path.join(root, f), path.join(distDir, f));
   }
+
+  const priority = { "index": "1.0", location: "0.9", about: "0.8", facilities: "0.8", membership: "0.8" };
+  const today = new Date().toISOString().slice(0, 10);
+  const urls = files
+    .map((f) => f.replace(".html", ""))
+    .filter((slug) => slug !== "404")
+    .sort((a, b) => (a === "index" ? -1 : b === "index" ? 1 : a.localeCompare(b)))
+    .map((slug) =>
+      [
+        "  <url>",
+        `    <loc>${canonical(slug)}</loc>`,
+        `    <lastmod>${today}</lastmod>`,
+        "    <changefreq>monthly</changefreq>",
+        `    <priority>${priority[slug] || "0.7"}</priority>`,
+        "  </url>",
+      ].join("\n")
+    );
+
+  await writeFile(
+    path.join(distDir, "sitemap.xml"),
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`
+  );
+  await writeFile(
+    path.join(distDir, "robots.txt"),
+    `User-agent: *\nAllow: /\n\nSitemap: ${SITE}sitemap.xml\n`
+  );
 
   await writeFile(path.join(distDir, ".nojekyll"), "");
   console.log(`built ${files.length} pages -> dist/`);
