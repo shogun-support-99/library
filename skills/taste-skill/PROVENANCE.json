@@ -1,0 +1,11 @@
+{
+  "name": "design-taste-frontend",
+  "display_name": "taste-skill (tasteskill v2)",
+  "upstream": "https://github.com/Leonxlnx/taste-skill.git",
+  "commit": "6010f91a9935f1c167dfc500fb1a475681892e6b",
+  "skill_version": "2",
+  "downloaded": "2026-10-22",
+  "vendored_from": "skills/taste-skill",
+  "license": "MIT",
+  "notes": "Folder keeps the upstream repo name (taste-skill); the SKILL.md frontmatter name is design-taste-frontend, which is the install name agents should use."
+}
