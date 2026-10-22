@@ -187,28 +187,27 @@ Build defaults are the Pages ones: `SITE_URL=https://shogun-support-99.github.io
 
 ### Vercel — https://arsmartlibrary-psi.vercel.app/
 
-Project `arsmartlibrary` (team *Eagle*), production alias `arsmartlibrary-psi.vercel.app`.
-Settings: no root directory override, install `true`, build `npm run build`, output `dist`,
-framework *vite* (only used to keep Vercel from guessing), and the environment variables
-`SITE_URL=https://arsmartlibrary-psi.vercel.app/` and `BASE_PATH=/`, which flip every link and
-canonical to the site root instead of `/library/`.
+**Automatic.** The project `arsmartlibrary` (team *Eagle*) is connected to
+`shogun-support-99/library` through the Vercel GitHub App, with the production branch `main` and the
+root directory `site`. A push to `main` deploys both hosts: Pages from the Actions workflow, Vercel
+from its own Git integration.
+
+Settings, which are also what `site/vercel.json` asks for:
+
+| Setting | Value | Why |
+|---|---|---|
+| Root Directory | `site` | the site has its own `package.json` and build script |
+| Install Command | `npm ci` | Tailwind is a dev dependency of `site/` |
+| Build Command | `npm run build` | `node build.mjs` |
+| Output Directory | `dist` | generated, git-ignored |
+| Framework | Vite | keeps Vercel from guessing; the build command is ours |
+| `SITE_URL` | `https://arsmartlibrary-psi.vercel.app/` | canonical URLs, Open Graph, sitemap |
+| `BASE_PATH` | `/` | links resolve from the domain root, not `/library/` |
 
 `arsmartlibrary.vercel.app` — the name without the suffix — belongs to another Vercel account, so
 this project got `-psi`. A shorter address needs a custom domain pointed at the project.
 
-**Why there is no push-to-deploy here yet.** Vercel deploys from Git through its GitHub App, and that
-app is not installed on the `shogun-support-99` account, so the project cannot be linked to the repo.
-Until it is, the project's source is a two-file build shim (`package.json` plus a script) that is
-uploaded directly to the deployment. The script fetches `shogun-support-99/library@main` from
-codeload, runs the repository's own `npm ci && node build.mjs` with the Vercel environment above, and
-copies the result into `dist`. In other words the Vercel copy is built from the same commit as Pages,
-but it is rebuilt only when a deployment is created by hand.
-
-To make it hands-off:
-
-1. Install the Vercel GitHub App for `shogun-support-99` (Vercel → *Add New… → Project* → import
-   `library`), and set the root directory to `site`.
-2. Point the production domain at that project, then delete the shim.
-
-After that, `site/vercel.json` (already in the repo) supplies the build command, output directory and
-the cache headers, and a push to `main` publishes both hosts.
+**Analytics.** Vercel Web Analytics is switched on for the project. `build.mjs` injects
+`/_vercel/insights/script.js` only when it is running on Vercel (`process.env.VERCEL`), because that
+path does not exist on GitHub Pages and a 404 on every page is worse than no analytics. The Pages
+build stays script-free.
