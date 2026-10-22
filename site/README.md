@@ -211,3 +211,7 @@ this project got `-psi`. A shorter address needs a custom domain pointed at the 
 `/_vercel/insights/script.js` only when it is running on Vercel (`process.env.VERCEL`), because that
 path does not exist on GitHub Pages and a 404 on every page is worse than no analytics. The Pages
 build stays script-free.
+
+**Short URLs.** Vercel redirects extensionless paths (`/about`, `/location`, …) to the real pages
+with a permanent redirect, so a typed or shared link still lands. Canonical URLs stay on `.html`,
+which is the only shape GitHub Pages can serve.
