@@ -3,6 +3,10 @@
 The site for **AR Smart Library**, a 24-hour reading library at Sadabahar Chowk, Namkum, Ranchi.
 
 **Live: https://shogun-support-99.github.io/library/**
+**Also live: https://arsmartlibrary-psi.vercel.app/** (Vercel, base path `/`)
+
+The same `src/` is built twice: once for the `/library/` prefix on GitHub Pages, once at `/` for Vercel.
+Only two environment variables differ — `SITE_URL` and `BASE_PATH`. See [Deploying](#deploying).
 
 ## What this is
 
@@ -161,6 +165,7 @@ Measured in headless Chromium against the built `dist/`, at 1440, 768 and 390:
 - **no JavaScript**: clock reads "any hour", hero untransformed, nothing hidden
 - **reduced motion**: 0 running animations, nothing hidden, band static
 - `/library/404.html` served from the production prefix resolves every asset
+- the Vercel copy serves all seven pages, `styles.css`, `sitemap.xml` and a custom 404 at the site root, with canonical URLs and sitemap entries pointing at `https://arsmartlibrary-psi.vercel.app/`
 
 Not done, and not claimed: no real photographs; the skills' `inspect.mjs` needs a full interactive
 Chrome, which this environment does not have; and page transitions only exist in browsers that
@@ -168,8 +173,42 @@ implement `@view-transition`.
 
 ## Deploying
 
+The site is published to two hosts from the same sources. Neither needs a local rebuild.
+
+### GitHub Pages — automatic
+
 Push to `main`. `.github/workflows/pages.yml` installs the two dev dependencies, runs the build,
 checks that the output contains the pages and no unfilled `{{tokens}}`, and publishes `site/dist` to
-GitHub Pages. No manual step, no redeploy to remember. A local rebuild is never required to publish.
+GitHub Pages. No manual step, no redeploy to remember.
 
 The workflow lives at the repository root because Actions only reads `.github/workflows/` there.
+Build defaults are the Pages ones: `SITE_URL=https://shogun-support-99.github.io/library/`,
+`BASE_PATH=/library/`.
+
+### Vercel — https://arsmartlibrary-psi.vercel.app/
+
+Project `arsmartlibrary` (team *Eagle*), production alias `arsmartlibrary-psi.vercel.app`.
+Settings: no root directory override, install `true`, build `npm run build`, output `dist`,
+framework *vite* (only used to keep Vercel from guessing), and the environment variables
+`SITE_URL=https://arsmartlibrary-psi.vercel.app/` and `BASE_PATH=/`, which flip every link and
+canonical to the site root instead of `/library/`.
+
+`arsmartlibrary.vercel.app` — the name without the suffix — belongs to another Vercel account, so
+this project got `-psi`. A shorter address needs a custom domain pointed at the project.
+
+**Why there is no push-to-deploy here yet.** Vercel deploys from Git through its GitHub App, and that
+app is not installed on the `shogun-support-99` account, so the project cannot be linked to the repo.
+Until it is, the project's source is a two-file build shim (`package.json` plus a script) that is
+uploaded directly to the deployment. The script fetches `shogun-support-99/library@main` from
+codeload, runs the repository's own `npm ci && node build.mjs` with the Vercel environment above, and
+copies the result into `dist`. In other words the Vercel copy is built from the same commit as Pages,
+but it is rebuilt only when a deployment is created by hand.
+
+To make it hands-off:
+
+1. Install the Vercel GitHub App for `shogun-support-99` (Vercel → *Add New… → Project* → import
+   `library`), and set the root directory to `site`.
+2. Point the production domain at that project, then delete the shim.
+
+After that, `site/vercel.json` (already in the repo) supplies the build command, output directory and
+the cache headers, and a push to `main` publishes both hosts.
