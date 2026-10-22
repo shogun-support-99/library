@@ -21,6 +21,51 @@ There are no photographs of the library on the page. None were supplied, and an 
 
 Everything factual comes from the business data sheet: address, hours, phone, ratings, establishment year. **Nothing is invented** — no prices, no facility list, no reviews. Facilities that were not confirmed (AC, Wi-Fi, lockers, parking) are named as unconfirmed rather than omitted or claimed, and membership pricing sends visitors to the phone.
 
+## The motion layer
+
+The page's idea is that its numbers are physical: they roll into place, and the clock in the
+headline keeps rolling all night. Everything else is quiet so that lands.
+
+| Where | What moves |
+|---|---|
+| On load | Headline rises line by line from its own baseline; the clock plate scales in; lede and actions rise 100 ms apart |
+| Quick facts | Figures roll digit by digit into place when the row arrives, staggered left to right |
+| Band | A marquee of the four facts, paused on hover and whenever it is off screen |
+| Section headings | Resolve line by line, not as one block |
+| Lists and copy | Staggered children, 70 ms apart |
+| The map | The route from the chowk to the door draws itself, then the marker pulses once |
+| Reviews | Scores roll into place |
+| Buttons | Press feedback (scale 0.975) and a colour change on hover, colour only, never movement |
+| FAQ | Answers expand; the +/− indicator rotates into a minus |
+| Header | Turns solid on scroll, and inverts while the dark closing section sits under it |
+
+**Gating.** Every hidden state lives behind `html.anim`, a class that `main.js` adds only after its
+observers exist, and the hero's load sequence is additionally behind `html.fonts` so the lines rise in
+the real typeface rather than mid-font-swap. With no script, a slow script or a broken one, the page is
+a complete static page. A 3-second watchdog drops the gate if nothing has revealed itself.
+
+**Reduced motion** is not zero motion: travel and blur go, while colour, the −/+ state and the
+figures' final values stay. Every recipe keeps the finished state as the reduced state.
+
+No animation library, no smooth-scroll hijack, no scroll listener per element. 13 distinct targets
+animate, one rAF-throttled scroll handler drives the header, and the clock ticks on the minute boundary
+rather than every second.
+
+## Bugs found and fixed
+
+Found by measuring the rendered page, not by reading the code.
+
+- **Rating values were hidden from assistive technology.** Both scores carried `aria-hidden="true"`, so a screen reader heard "out of 5 on Google" with no number. Removed.
+- **Every hero line was invisible under `prefers-reduced-motion`.** The reduced-motion override used a weaker selector (`.js`) than the rule that hides the lines (`.js.fonts`), so the hidden state won and the headline never appeared for exactly the users the rule exists to protect. Selectors now match.
+- **The stacked digits leaked into `innerText`.** A rolling figure is ten stacked digits; as text nodes they polluted the accessible name, copy-paste and any crawler reading the page. Glyphs are now drawn by CSS `content: attr(data-d)` and the headline carries its own stable sentence.
+- **The FAQ indicator disappeared.** Replacing a gradient-built `+` with a flat colour made the `background` shorthand invalid (a colour is not an image layer), so the icon vanished. Rebuilt as two elements.
+- **The masthead could stay dark on a pale section.** Its inverted state came from an IntersectionObserver, which only fires when a relationship *changes*; scrolling back up left it stale. Now computed from scroll position each frame.
+- **Anchors landed under the sticky header.** `scroll-margin-top` was 0; now set from the header height.
+- **`twitter:card` promised `summary_large_image` with no image**, and `apple-touch-icon` pointed at an SVG, which iOS ignores. Both assets now exist: a 1200x630 share card and a real 180x180 PNG.
+- **`overflow-x: hidden` would have broken the sticky header**, because it makes the root a scroll container. Changed to `overflow-x: clip`.
+- **The clock rolled on first paint**, so the headline showed tumbling digits before it was readable. The plate now lands already correct.
+- **A review score measured 6 lines** because a grid row stretched the heading box; `align-items: start` fixed the layout and the measurement.
+
 ## How it was designed
 
 Built with the skills vendored in this repo, chiefly **taste-skill**'s run, with **impeccable**'s craft floor as the quality gate.

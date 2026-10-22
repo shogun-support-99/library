@@ -2,6 +2,7 @@
 <html lang="en-IN">
 <head>
 <meta charset="utf-8">
+<script>document.documentElement.classList.add('js');</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AR Smart Library | 24-Hour Library in Namkum, Ranchi</title>
 <meta name="description" content="AR Smart Library is a 24-hour reading and study library at Sadabahar Chowk, Namkum, Ranchi. Open every day, all night. Find the address, call the library, or get directions.">
@@ -9,7 +10,6 @@
 <meta name="author" content="AR Smart Library">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <link rel="canonical" href="https://shogun-support-99.github.io/library/">
-<meta name="theme-color" content="#ddd6c6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#ddd6c6">
 
 <meta property="og:type" content="website">
@@ -18,12 +18,17 @@
 <meta property="og:title" content="AR Smart Library | Open at any hour, in Namkum, Ranchi">
 <meta property="og:description" content="A 24-hour reading library at Sadabahar Chowk, Namkum, beside Katyayni Sweets. Open every day, all night.">
 <meta property="og:url" content="https://shogun-support-99.github.io/library/">
+<meta property="og:image" content="https://shogun-support-99.github.io/library/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="AR Smart Library, open 24 hours, at Sadabahar Chowk in Namkum, Ranchi.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="AR Smart Library | Open at any hour, in Namkum, Ranchi">
 <meta name="twitter:description" content="A 24-hour reading library at Sadabahar Chowk, Namkum, beside Katyayni Sweets.">
+<meta name="twitter:image" content="https://shogun-support-99.github.io/library/assets/og-image.png">
 
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="assets/favicon.svg">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -38,6 +43,7 @@
   "name": "AR Smart Library",
   "description": "A 24-hour reading and study library at Sadabahar Chowk, Namkum, Ranchi, Jharkhand.",
   "url": "https://shogun-support-99.github.io/library/",
+  "image": "https://shogun-support-99.github.io/library/assets/og-image.png",
   "telephone": "+917070549845",
   "address": {
     "@type": "PostalAddress",
@@ -61,7 +67,7 @@
 <body>
 <a class="skip" href="#about">Skip to the page</a>
 
-<header class="masthead">
+<header class="masthead" data-header>
   <a class="wordmark" href="#top" aria-label="AR Smart Library, back to the top">
     <span class="mark" aria-hidden="true">AR</span>
     <span class="wordmark__text">Smart Library</span>
@@ -80,16 +86,18 @@
 
   <section class="hero" aria-labelledby="hero-title">
     <h1 class="hero__title" id="hero-title">
-      <span class="line"><span class="line__in">AR Smart Library</span></span>
-      <span class="line"><span class="line__in">is open at
-        <span class="clock" aria-hidden="true"><span class="clock__time" id="clock">any hour</span></span>
+      <span class="line"><span class="line__in" style="--i:0">AR Smart Library</span></span>
+      <span class="line"><span class="line__in" style="--i:1">is open at
+        <span class="clock" data-clock aria-hidden="true">
+          <span class="clock__time" id="clock"><span class="clock__nojs">any hour</span><span class="clock__js">--:--</span></span>
+        </span>
         <span class="sr-only">any hour of the night or day</span>
       </span></span>
     </h1>
 
     <div class="hero__foot">
-      <p class="hero__lede">A reading and study library on the first floor of Kamla Enclave, Sadabahar Chowk, Namkum. The stairs beside Katyayni Sweets. Open all night, every night.</p>
-      <div class="hero__acts">
+      <p class="hero__lede" data-load style="--d:520ms">A reading and study library on the first floor of Kamla Enclave, Sadabahar Chowk, Namkum. The stairs beside Katyayni Sweets. Open all night, every night.</p>
+      <div class="hero__acts" data-load style="--d:620ms">
         <a class="btn" href="https://maps.app.goo.gl/W3mpeq8EDtGj3rn9A" target="_blank" rel="noopener">Get directions</a>
         <a class="btn btn--quiet" href="tel:+917070549845">Call +91&nbsp;70705&nbsp;49845</a>
       </div>
@@ -98,16 +106,41 @@
 
   <section class="facts" aria-label="At a glance">
     <ul>
-      <li><span class="fact__fig">24<span class="fact__unit">×7</span></span><span class="fact__label">Open every day, all night</span></li>
-      <li><span class="fact__fig">2024</span><span class="fact__label">Serving students since</span></li>
-      <li><span class="fact__fig">4.7</span><span class="fact__label">Out of 5 on Google, 50 reviews</span></li>
-      <li><span class="fact__fig fact__fig--word">Namkum</span><span class="fact__label">Ranchi, Jharkhand 834010</span></li>
+      <li data-reveal style="--i:0"><span class="fact__fig"><span data-roll="24">24</span><span class="fact__unit">×7</span></span><span class="fact__label">Open every day, all night</span></li>
+      <li data-reveal style="--i:1"><span class="fact__fig"><span data-roll="2024">2024</span></span><span class="fact__label">Serving students since</span></li>
+      <li data-reveal style="--i:2"><span class="fact__fig"><span data-roll="4.7">4.7</span></span><span class="fact__label">Out of 5 on Google, 50 reviews</span></li>
+      <li data-reveal style="--i:3"><span class="fact__fig fact__fig--word">Namkum</span><span class="fact__label">Ranchi, Jharkhand 834010</span></li>
     </ul>
   </section>
 
+  <div class="band" aria-hidden="true" data-band>
+    <div class="band__track">
+      <div class="band__group">
+        <span>Open 24 hours</span><span class="band__dot"></span>
+        <span>Sadabahar Chowk</span><span class="band__dot"></span>
+        <span>Namkum, Ranchi</span><span class="band__dot"></span>
+        <span>First floor, beside Katyayni Sweets</span><span class="band__dot"></span>
+        <span>Open 24 hours</span><span class="band__dot"></span>
+        <span>Sadabahar Chowk</span><span class="band__dot"></span>
+        <span>Namkum, Ranchi</span><span class="band__dot"></span>
+        <span>First floor, beside Katyayni Sweets</span><span class="band__dot"></span>
+      </div>
+      <div class="band__group">
+        <span>Open 24 hours</span><span class="band__dot"></span>
+        <span>Sadabahar Chowk</span><span class="band__dot"></span>
+        <span>Namkum, Ranchi</span><span class="band__dot"></span>
+        <span>First floor, beside Katyayni Sweets</span><span class="band__dot"></span>
+        <span>Open 24 hours</span><span class="band__dot"></span>
+        <span>Sadabahar Chowk</span><span class="band__dot"></span>
+        <span>Namkum, Ranchi</span><span class="band__dot"></span>
+        <span>First floor, beside Katyayni Sweets</span><span class="band__dot"></span>
+      </div>
+    </div>
+  </div>
+
   <section class="about" id="about" aria-labelledby="about-title">
-    <h2 class="statement" id="about-title">Some study hours<br>don’t fit a timetable.</h2>
-    <div class="about__body">
+    <h2 class="statement" id="about-title" data-reveal data-lines>Some study hours<br>don’t fit a timetable.</h2>
+    <div class="about__body" data-reveal data-stagger>
       <p>AR Smart Library keeps a dedicated reading space open around the clock at Sadabahar Chowk, in Namkum. Exam season, night shifts, a chapter that won’t close at ten. The room stays available at the hour you actually need it.</p>
       <p>The library sits on the first floor of Kamla Enclave, beside Katyayni Sweets, so it is easy to point out to an auto driver and easy to find the first time you come. It has been open since 2024 and takes its timings seriously: every day of the week begins and ends with the doors open.</p>
       <p class="about__note">Seats, opening the door at 3 a.m., whether the room is full in the evening: these change week to week. A call before you travel is always worth it.</p>
@@ -115,40 +148,36 @@
   </section>
 
   <section class="confirmed" id="facilities" aria-labelledby="facilities-title">
-    <h2 class="statement" id="facilities-title">What this page can<br>confirm for you.</h2>
+    <h2 class="statement" id="facilities-title" data-reveal data-lines>What this page can<br>confirm for you.</h2>
     <ul class="rows">
-      <li class="row">
+      <li class="row" data-reveal style="--i:0">
         <h3>Open twenty-four hours</h3>
         <p>All seven days, including Sundays and public holidays, as listed on Google. There is no closing time to plan around.</p>
       </li>
-      <li class="row">
+      <li class="row" data-reveal style="--i:1">
         <h3>A reading room, not a café</h3>
         <p>The library is listed as a library and reading library. People come here to sit with their own material in a quiet, dedicated study environment.</p>
       </li>
-      <li class="row">
+      <li class="row" data-reveal style="--i:2">
         <h3>A landmark you can name</h3>
         <p>Sadabahar Chowk, beside Katyayni Sweets, first floor. If someone in Namkum knows the sweet shop, they know where you are going.</p>
       </li>
     </ul>
-    <p class="unconfirmed">Air conditioning, Wi-Fi, lockers, power backup, parking, washrooms and charging points are not published here, because they are not confirmed. Call the library and ask. It is a two-minute conversation, and it beats arriving with the wrong expectation.</p>
+    <p class="unconfirmed" data-reveal>Air conditioning, Wi-Fi, lockers, power backup, parking, washrooms and charging points are not published here, because they are not confirmed. Call the library and ask. It is a two-minute conversation, and it beats arriving with the wrong expectation.</p>
   </section>
 
   <section class="place" id="location" aria-labelledby="location-title">
     <div class="place__text">
-      <h2 class="statement" id="location-title">Find the stairs<br>beside the sweets.</h2>
-      <address class="address">
-        1st Floor, Kamla Enclave,<br>
-        Sadabahar Chowk, beside Katyayni Sweets,<br>
-        Namkum, Ranchi, Jharkhand 834010
-      </address>
-      <div class="place__acts">
+      <h2 class="statement" id="location-title" data-reveal data-lines>Find the stairs<br>beside the sweets.</h2>
+      <address class="address" data-reveal>1st Floor, Kamla Enclave,<br>Sadabahar Chowk, beside Katyayni Sweets,<br>Namkum, Ranchi, Jharkhand 834010</address>
+      <div class="place__acts" data-reveal>
         <a class="btn" href="https://maps.app.goo.gl/W3mpeq8EDtGj3rn9A" target="_blank" rel="noopener">Open in Google Maps</a>
         <a class="btn btn--quiet" href="tel:+917070549845">Call the library</a>
       </div>
-      <p class="place__hours"><strong>Every day</strong><br>Open 24 hours, no closing time.</p>
+      <p class="place__hours" data-reveal><strong>Every day</strong><br>Open 24 hours, no closing time.</p>
     </div>
 
-    <figure class="map">
+    <figure class="map" data-reveal data-map>
       <svg viewBox="0 78 640 342" role="img" aria-labelledby="map-title map-desc" class="map__svg">
         <title id="map-title">Schematic map of Sadabahar Chowk in Namkum</title>
         <desc id="map-desc">A not-to-scale diagram: Namkum Road runs left to right and a side road meets it at Sadabahar Chowk. Katyayni Sweets sits on the corner, and Kamla Enclave, with AR Smart Library on its first floor, stands beside it.</desc>
@@ -164,6 +193,7 @@
           <text class="map__small" x="102" y="226">first floor</text>
         </g>
         <g class="map__marker">
+          <circle class="map__marker-halo" cx="258" cy="262" r="20" />
           <circle cx="258" cy="262" r="20" />
           <text class="map__marker-text" x="258" y="267" text-anchor="middle">AR</text>
         </g>
@@ -174,6 +204,9 @@
           <text x="316" y="279">Sweets</text>
         </g>
 
+        <path class="map__route" d="M466 318 Q 258 318 258 288" />
+        <path class="map__route-tip" d="M251 296 L 258 285 L 265 296" />
+
         <text class="map__road-name" x="40" y="352">Namkum Road</text>
         <text class="map__chowk" x="534" y="248" text-anchor="middle">Sadabahar Chowk</text>
       </svg>
@@ -182,17 +215,17 @@
   </section>
 
   <section class="reviews" aria-labelledby="reviews-title">
-    <h2 class="statement" id="reviews-title">Rated by the people<br>who sit here.</h2>
+    <h2 class="statement" id="reviews-title" data-reveal data-lines>Rated by the people<br>who sit here.</h2>
     <div class="reviews__grid">
-      <div class="score">
-        <p class="score__num" aria-hidden="true">4.7</p>
+      <div class="score" data-reveal style="--i:0">
+        <p class="score__num"><span data-roll="4.7">4.7</span></p>
         <p class="score__meta"><span class="score__src">out of 5 on Google</span><span class="score__src">from 50 reviews</span></p>
       </div>
-      <div class="score">
-        <p class="score__num" aria-hidden="true">4.6</p>
+      <div class="score" data-reveal style="--i:1">
+        <p class="score__num"><span data-roll="4.6">4.6</span></p>
         <p class="score__meta"><span class="score__src">out of 5 on Justdial</span><span class="score__src">from 39 ratings</span></p>
       </div>
-      <div class="reviews__copy">
+      <div class="reviews__copy" data-reveal style="--i:2">
         <p>Public listings for AR Smart Library average 4.7 on Google and 4.6 on Justdial. The reviews belong to the people who wrote them, so they are linked rather than copied here.</p>
         <a class="link" href="https://maps.app.goo.gl/W3mpeq8EDtGj3rn9A" target="_blank" rel="noopener">Read the reviews on Google</a>
         <p class="fine">Ratings and review counts were taken from public listings on 6 October 2026 and can change.</p>
@@ -201,8 +234,8 @@
   </section>
 
   <section class="membership" id="membership" aria-labelledby="membership-title">
-    <h2 class="statement" id="membership-title">Plans are set on<br>the phone, not here.</h2>
-    <div class="membership__body">
+    <h2 class="statement" id="membership-title" data-reveal data-lines>Plans are set on<br>the phone, not here.</h2>
+    <div class="membership__body" data-reveal data-stagger>
       <p>Monthly, quarterly and annual plans may be available, along with student rates and the occasional daily pass. The amounts are not published anywhere we can verify, so they are not printed here. A stale price on a website is worse than no price at all.</p>
       <p>Call and ask for three things: the current plan, whether a seat is free tonight, and what the plan includes.</p>
       <a class="btn" href="tel:+917070549845">Call for membership details</a>
@@ -210,43 +243,44 @@
   </section>
 
   <section class="faq" id="faq" aria-labelledby="faq-title">
-    <h2 class="statement" id="faq-title">Questions people<br>ask before coming.</h2>
-    <div class="faq__list">
+    <h2 class="statement" id="faq-title" data-reveal data-lines>Questions people<br>ask before coming.</h2>
+    <div class="faq__list" data-reveal data-stagger>
       <details>
-        <summary>Is AR Smart Library really open 24 hours?</summary>
+        <summary>Is AR Smart Library really open 24 hours?<span class="faq__sign" aria-hidden="true"></span></summary>
         <p>Yes. Public business listings show it open 24 hours a day, seven days a week, with the same hours on Sundays.</p>
       </details>
       <details>
-        <summary>Where exactly is it?</summary>
+        <summary>Where exactly is it?<span class="faq__sign" aria-hidden="true"></span></summary>
         <p>On the first floor of Kamla Enclave at Sadabahar Chowk, Namkum, beside Katyayni Sweets.</p>
       </details>
       <details>
-        <summary>What is the phone number?</summary>
+        <summary>What is the phone number?<span class="faq__sign" aria-hidden="true"></span></summary>
         <p><a href="tel:+917070549845">+91 70705 49845</a> is the publicly listed number.</p>
       </details>
       <details>
-        <summary>When did the library open?</summary>
+        <summary>When did the library open?<span class="faq__sign" aria-hidden="true"></span></summary>
         <p>Public directory information lists the establishment year as 2024.</p>
       </details>
       <details>
-        <summary>How do I get a membership?</summary>
+        <summary>How do I get a membership?<span class="faq__sign" aria-hidden="true"></span></summary>
         <p>Call the library. Plans, prices and seat availability are confirmed on the phone rather than on this page.</p>
       </details>
       <details>
-        <summary>Is there Wi-Fi, AC, parking or a locker?</summary>
+        <summary>Is there Wi-Fi, AC, parking or a locker?<span class="faq__sign" aria-hidden="true"></span></summary>
         <p>These are not confirmed publicly, so they are not claimed here. Ask when you call and you will get a straight answer.</p>
       </details>
       <details>
-        <summary>Can I come at three in the morning?</summary>
+        <summary>Can I come at three in the morning?<span class="faq__sign" aria-hidden="true"></span></summary>
         <p>The listed hours say yes, every day. If it is your first visit, call ahead so someone knows to expect you.</p>
       </details>
     </div>
   </section>
 
   <section class="close" aria-labelledby="close-title">
-    <h2 class="close__title" id="close-title">The light<br>stays on.</h2>
-    <p class="close__lede">Sadabahar Chowk, Namkum. First floor, beside Katyayni Sweets. Whatever the hour is when you read this, the library is open.</p>
-    <div class="close__acts">
+    <div class="close__sentinel" aria-hidden="true" data-sentinel></div>
+    <h2 class="close__title" id="close-title" data-reveal data-lines>The light<br>stays on.</h2>
+    <p class="close__lede" data-reveal>Sadabahar Chowk, Namkum. First floor, beside Katyayni Sweets. Whatever the hour is when you read this, the library is open.</p>
+    <div class="close__acts" data-reveal>
       <a class="btn btn--invert" href="tel:+917070549845">Call +91&nbsp;70705&nbsp;49845</a>
       <a class="btn btn--outline" href="https://maps.app.goo.gl/W3mpeq8EDtGj3rn9A" target="_blank" rel="noopener">Get directions</a>
     </div>
