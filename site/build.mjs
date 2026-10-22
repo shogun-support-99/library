@@ -29,6 +29,12 @@ const distDir = path.join(root, "dist");
 const SITE = (process.env.SITE_URL || "https://shogun-support-99.github.io/library/").replace(/\/?$/, "/");
 const BASE = (process.env.BASE_PATH || "/library/").replace(/^(?!\/)/, "/").replace(/\/?$/, "/");
 const watchMode = process.argv.includes("--watch");
+/* Vercel Web Analytics is served from the deployment itself at a path that only
+   exists on Vercel. GitHub Pages would answer the same request with a 404, so
+   the snippet is injected only when the build is running on Vercel. */
+const ANALYTICS = process.env.VERCEL
+  ? '<script defer src="/_vercel/insights/script.js"></script>'
+  : "";
 
 /* ------------------------------------------------------------ front matter */
 
@@ -144,7 +150,8 @@ function paint(html, meta, slug) {
     .replaceAll("{{URL}}", canonical(slug))
     .replaceAll("{{JSONLD}}", jsonld(meta, slug))
     .replaceAll("{{ROOT}}", BASE)
-    .replaceAll("{{OG_IMAGE}}", `${SITE}assets/og-image.png`);
+    .replaceAll("{{OG_IMAGE}}", `${SITE}assets/og-image.png`)
+    .replaceAll("{{ANALYTICS}}", ANALYTICS);
 
   // every front-matter key is a token: {{TITLE}}, {{CLOSE}}, and so on
   for (const [key, value] of Object.entries(meta)) {
