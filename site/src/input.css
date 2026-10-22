@@ -340,6 +340,9 @@
     margin-left: 0.08em;
   }
   .clock__time { @apply inline-block; }
+  /* the clause is only needed once the plate hides the no-script words */
+  .clock__sr { display: none; }
+  .js .clock__sr { display: inline; }
   .clock__js { display: none; }
   .js .clock__nojs { display: none; }
   .js .clock__js {
