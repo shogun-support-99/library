@@ -1,15 +1,18 @@
-# library & AR Smart Library
+# library
 
-A vendored collection of agent skills. Each skill is checked in at its upstream payload, unmodified, with the source commit recorded so it can be audited or re-synced.
+**Live site:** [AR Smart Library — 24-hour reading library in Namkum, Ranchi](https://shogun-support-99.github.io/library/) · [skills](#contents)
+
+Agent **skills for AI coding agents** (design and frontend), vendored at their upstream payload, unmodified, with the source commit recorded so they can be audited or re-synced. The website for AR Smart Library lives in [`site/`](site/) and deploys from this repository.
 
 **9 skills from 3 upstream repos.** All are frontend/design oriented; they overlap in intent and are meant to be mixed, not installed as one system.
 
-## Live site
+## The site
 
-This repo also hosts the website for **AR Smart Library**, a 24-hour reading library in Namkum, Ranchi: [`site/`](site/) → **https://shogun-support-99.github.io/library/**
+[![AR Smart Library — open 24 hours, Sadabahar Chowk, Namkum](https://img.shields.io/badge/live-AR%20Smart%20Library-4f6238?style=for-the-badge)](https://shogun-support-99.github.io/library/)
 
-Pushing to `main` redeploys it automatically via [`.github/workflows/pages.yml`](.github/workflows/pages.yml). See [`site/README.md`](site/README.md) for what the page does and how to edit it.
+A single static page for a 24-hour reading library at Sadabahar Chowk, Namkum, Ranchi, built on the sentence *"AR Smart Library is open at ⟨time⟩"* with the time **live in the headline**. No build step, no dependencies, no tracking, self-hosted typeface.
 
+Every push to `main` redeploys it automatically via [`.github/workflows/pages.yml`](.github/workflows/pages.yml), so there is no manual deploy step to remember. What the page says and how to edit it: [`site/README.md`](site/README.md).
 
 ## Contents
 

@@ -21,6 +21,21 @@ There are no photographs of the library on the page. None were supplied, and an 
 
 Everything factual comes from the business data sheet: address, hours, phone, ratings, establishment year. **Nothing is invented** — no prices, no facility list, no reviews. Facilities that were not confirmed (AC, Wi-Fi, lockers, parking) are named as unconfirmed rather than omitted or claimed, and membership pricing sends visitors to the phone.
 
+## How it was designed
+
+Built with the skills vendored in this repo, chiefly **taste-skill**'s run, with **impeccable**'s craft floor as the quality gate.
+
+1. **Direction drawn, not invented.** `draw.mjs --sector education --tone quiet` dealt three directions; `sentence-as-layout` was chosen because it can carry the one thing only this library has: the hour. The sheet then dealt Schibsted Grotesk and the sand-and-moss palette (`--seed 60`), both re-dealt from the same direction's slots rather than picked by hand.
+2. **The idea:** "On this page, the library's 24-hour promise becomes a live clock inside the sentence."
+3. **Fabrication refused.** The sheet's photography slots assume photographs exist. None of the library does, and a stock interior would misrepresent it, so those slots hold the live clock and a drawn schematic of the junction. This is the deviation from the sheet, and the reason for it.
+4. **Gated, not assumed.** `lint.mjs` (0 banned patterns) and a headless-Chromium pass over 1440/768/390 measured what the skills say to measure. `inspect.mjs` was not used: it needs a real Chrome install, which this build environment does not have.
+
+Two things the gate caught that would otherwise have shipped broken:
+
+- A `clip-path` reveal clipped each heading's own intersection box to zero, so `IntersectionObserver` could never fire and **every section heading would have stayed invisible**. Replaced with a blur-and-rise reveal, with the class added by JS so the no-JS path is unaffected.
+- Star glyphs stood in for a rating icon, and the em-dash habit ran to five on the page. Both flagged by `lint.mjs` and removed.
+
+
 ## Editing
 
 Content is plain HTML. The facts that appear more than once (address, phone, hours) are written out in each place on purpose so the page stays readable and searchable; if you change one, change all of them:
