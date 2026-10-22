@@ -1,8 +1,15 @@
-# library
+# library & AR Smart Library
 
 A vendored collection of agent skills. Each skill is checked in at its upstream payload, unmodified, with the source commit recorded so it can be audited or re-synced.
 
 **9 skills from 3 upstream repos.** All are frontend/design oriented; they overlap in intent and are meant to be mixed, not installed as one system.
+
+## Live site
+
+This repo also hosts the website for **AR Smart Library**, a 24-hour reading library in Namkum, Ranchi: [`site/`](site/) → **https://shogun-support-99.github.io/library/**
+
+Pushing to `main` redeploys it automatically via [`.github/workflows/pages.yml`](.github/workflows/pages.yml). See [`site/README.md`](site/README.md) for what the page does and how to edit it.
+
 
 ## Contents
 
