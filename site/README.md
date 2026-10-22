@@ -1,102 +1,175 @@
 # AR Smart Library — website
 
-The official site for **AR Smart Library**, a 24-hour reading library at Sadabahar Chowk, Namkum, Ranchi.
+The site for **AR Smart Library**, a 24-hour reading library at Sadabahar Chowk, Namkum, Ranchi.
 
 **Live: https://shogun-support-99.github.io/library/**
 
 ## What this is
 
-A single static page, no build step, no dependencies, no tracking. Open `index.html` and it runs.
+Seven pages, one shared design system, built with Tailwind CSS v4 and a small Node build script.
+No framework, no client-side router, no tracking.
 
-- `index.html` — the page, with schema.org `Library` structured data, Open Graph tags and FAQ content
-- `styles.css` — all styling; the typeface is self-hosted from `assets/fonts/` (no Google Fonts request)
-- `main.js` — three behaviours: the live clock in the headline, the heading reveal, and nothing else
-- `404.html`, `robots.txt`, `sitemap.xml`, `site.webmanifest`, `assets/favicon.svg`
+| Page | Job |
+|---|---|
+| `index` | The clock, the four facts, the ratings, and the way into the rest |
+| `about` | The story, who the room is for, and the rules this site writes by |
+| `facilities` | What is confirmed, what is not, and six questions to ask before travelling |
+| `membership` | Why no prices are printed, and how the call goes |
+| `location` | The address, a drawn schematic of the chowk, hours, and what to tell an auto driver |
+| `faq` | Seven short answers |
+| `contact` | The one published route in |
+
+```
+site/
+  src/
+    input.css        Tailwind entry: @theme tokens, keyframes, components, motion states
+    pages/*.html     one file per page, each with a small front-matter comment
+    partials/        head, header, footer, band, closing section
+  build.mjs          front matter + includes + JSON-LD + Tailwind -> dist/
+  app.js             clock, rolling figures, reveals, header state, menu
+  assets/            fonts, icons, share image
+  robots.txt, sitemap.xml, site.webmanifest
+```
+
+`dist/` is generated and git-ignored; Actions builds it on every push to `main`.
+The old single page (`index.html`, `styles.css`, `main.js` at the site root) is gone.
+
+## Editing
+
+Content lives in `site/src/pages/*.html`. Each page opens with a comment block:
+
+```
+<!--@
+title=Facilities | AR Smart Library, Namkum, Ranchi
+desc=What is confirmed … and the six questions to ask before your first visit.
+close=Ask first,<br>then travel.
+close_lede=One phone call answers more than any page can.
+@-->
+```
+
+`title`, `desc` and `slug` (the filename) feed the `<title>`, description, canonical URL, Open Graph
+tags and JSON-LD. `close` and `close_lede` are the words in the dark closing section. Any front-matter
+key becomes an `{{UPPERCASE}}` token in the page. An unfilled token fails the build rather than shipping.
+
+Shared chrome comes from `partials/`, included with `<!-- include: header.html -->`. Nested includes are
+resolved in two passes. Navigation marks itself: any link with `data-nav="<slug>"` gets `.is-current`
+and `aria-current="page"` on the page it points to, so the nav, the compact menu and the footer never
+disagree.
+
+Local preview:
+
+```bash
+cd site
+npm install
+npm run dev      # builds, then rebuilds on src/ changes
+# in another shell
+npm run serve    # http://localhost:8080
+```
+
+## Styling
+
+Tailwind v4 — configuration lives in CSS, not in a `tailwind.config.js`:
+
+- **`@theme`** holds the palette (`--color-sand`, `--color-moss`, `--color-field` …), the five type
+  steps, the gutter unit and the easing curves. Those become utilities: `bg-moss`, `text-lead`,
+  `gap-x-gutter`, `ease-expo`.
+- **`@layer components`** holds the shapes that are not utilities: the masthead, buttons, the clock
+  plate, the rolling-digit columns, the marquee band, the schematic map, the FAQ indicator.
+- **Utilities** do the layout in the markup: the 12-column grids, spans, spacing, and breakpoints.
+
+Tailwind is a utility CSS framework, not an animation library. Here it owns the motion *definitions*
+(`@keyframes`, the duration/easing tokens, the `animate-*` names) while `app.js` decides *when* —
+adding `is-in` on intersection, ticking the clock, setting `--d` on a digit. That split is deliberate:
+no animation runtime ships, and every state has a static finish.
 
 ## The idea
 
-The page is built on one sentence — *“AR Smart Library is open at ⟨time⟩”* — and the time inside it is live, ticked to Asia/Kolkata. The thing the business actually promises is shown rather than claimed.
+The site is built on one sentence — *“AR Smart Library is open at ⟨time⟩”* — and the time inside it is
+live, ticked to Asia/Kolkata. The thing the business actually promises is shown rather than claimed.
+Every page keeps the same voice: a heading with a point of view, then the plain fact underneath it.
 
-There are no photographs of the library on the page. None were supplied, and an interior shot of some other reading room would be a lie, so the picture slots hold the live clock and a drawn schematic of the junction instead. If the library supplies its own photographs, they can replace the schematic directly.
+There are no photographs of the library, because none were supplied; an interior shot of some other
+reading room would be a lie. The picture slot holds the live clock and a drawn schematic of the junction.
 
-Everything factual comes from the business data sheet: address, hours, phone, ratings, establishment year. **Nothing is invented** — no prices, no facility list, no reviews. Facilities that were not confirmed (AC, Wi-Fi, lockers, parking) are named as unconfirmed rather than omitted or claimed, and membership pricing sends visitors to the phone.
+Everything factual comes from the business data sheet: address, hours, phone, ratings, establishment
+year. **Nothing is invented** — no prices, no facility list, no reviews. Facilities that were not
+confirmed (AC, Wi-Fi, lockers, CCTV, parking, power backup, washrooms, cabins, seat booking) are named
+as unconfirmed rather than omitted or claimed. Messaging is absent because no WhatsApp route is
+confirmed. Membership pricing sends visitors to the phone.
 
 ## The motion layer
-
-The page's idea is that its numbers are physical: they roll into place, and the clock in the
-headline keeps rolling all night. Everything else is quiet so that lands.
 
 | Where | What moves |
 |---|---|
 | On load | Headline rises line by line from its own baseline; the clock plate scales in; lede and actions rise 100 ms apart |
-| Quick facts | Figures roll digit by digit into place when the row arrives, staggered left to right |
-| Band | A marquee of the four facts, paused on hover and whenever it is off screen |
+| Every page head | Eyebrow, headline, lede and rule arrive in sequence |
+| Quick facts | Figures roll digit by digit when the row arrives, staggered left to right |
+| Band | A marquee, paused on hover and whenever it is off screen |
 | Section headings | Resolve line by line, not as one block |
 | Lists and copy | Staggered children, 70 ms apart |
 | The map | The route from the chowk to the door draws itself, then the marker pulses once |
-| Reviews | Scores roll into place |
-| Buttons | Press feedback (scale 0.975) and a colour change on hover, colour only, never movement |
+| Index cards | Arrow lifts on hover; colour shifts, the card never moves |
 | FAQ | Answers expand; the +/− indicator rotates into a minus |
 | Header | Turns solid on scroll, and inverts while the dark closing section sits under it |
+| Between pages | `@view-transition` where the browser supports it |
 
-**Gating.** Every hidden state lives behind `html.anim`, a class that `main.js` adds only after its
-observers exist, and the hero's load sequence is additionally behind `html.fonts` so the lines rise in
-the real typeface rather than mid-font-swap. With no script, a slow script or a broken one, the page is
-a complete static page. A 3-second watchdog drops the gate if nothing has revealed itself.
+**Gating.** Every hidden state lives behind `html.anim`, a class `app.js` adds only after its observers
+exist, and the hero's load sequence sits behind `html.fonts` so lines rise in the real typeface rather
+than mid-font-swap. With no script, a slow script or a broken one, every page is complete and readable.
+A 3-second watchdog drops the gate if nothing has revealed itself.
 
-**Reduced motion** is not zero motion: travel and blur go, while colour, the −/+ state and the
-figures' final values stay. Every recipe keeps the finished state as the reduced state.
+**Reduced motion** is not zero motion: travel goes, while colour, the −/+ state and the figures' final
+values stay. Verified: 0 running animations, nothing left hidden.
 
-No animation library, no smooth-scroll hijack, no scroll listener per element. 13 distinct targets
-animate, one rAF-throttled scroll handler drives the header, and the clock ticks on the minute boundary
-rather than every second.
+No animation library, no scroll hijack, one rAF-throttled scroll handler, and the clock ticks on the
+minute boundary rather than every second.
 
 ## Bugs found and fixed
 
-Found by measuring the rendered page, not by reading the code.
+First pass (single page):
 
-- **Rating values were hidden from assistive technology.** Both scores carried `aria-hidden="true"`, so a screen reader heard "out of 5 on Google" with no number. Removed.
-- **Every hero line was invisible under `prefers-reduced-motion`.** The reduced-motion override used a weaker selector (`.js`) than the rule that hides the lines (`.js.fonts`), so the hidden state won and the headline never appeared for exactly the users the rule exists to protect. Selectors now match.
-- **The stacked digits leaked into `innerText`.** A rolling figure is ten stacked digits; as text nodes they polluted the accessible name, copy-paste and any crawler reading the page. Glyphs are now drawn by CSS `content: attr(data-d)` and the headline carries its own stable sentence.
-- **The FAQ indicator disappeared.** Replacing a gradient-built `+` with a flat colour made the `background` shorthand invalid (a colour is not an image layer), so the icon vanished. Rebuilt as two elements.
-- **The masthead could stay dark on a pale section.** Its inverted state came from an IntersectionObserver, which only fires when a relationship *changes*; scrolling back up left it stale. Now computed from scroll position each frame.
-- **Anchors landed under the sticky header.** `scroll-margin-top` was 0; now set from the header height.
-- **`twitter:card` promised `summary_large_image` with no image**, and `apple-touch-icon` pointed at an SVG, which iOS ignores. Both assets now exist: a 1200x630 share card and a real 180x180 PNG.
-- **`overflow-x: hidden` would have broken the sticky header**, because it makes the root a scroll container. Changed to `overflow-x: clip`.
-- **The clock rolled on first paint**, so the headline showed tumbling digits before it was readable. The plate now lands already correct.
-- **A review score measured 6 lines** because a grid row stretched the heading box; `align-items: start` fixed the layout and the measurement.
+- **Rating values were hidden from assistive technology** — both scores carried `aria-hidden="true"`, so a screen reader heard "out of 5 on Google" with no number.
+- **Every hero line was invisible under `prefers-reduced-motion`** — the override was weaker than the rule that hid it. Selectors now match.
+- **Stacked digits leaked into `innerText`** — glyphs are drawn by CSS `content: attr(data-d)`; the headline carries its own stable sentence.
+- **The FAQ indicator disappeared** — a colour is not a valid `background` image layer. Rebuilt as two elements.
+- **The masthead could stay dark on a pale section** — an IntersectionObserver only fires on change; now computed per frame from scroll position.
+- **Anchors landed under the sticky header** — `scroll-margin-top` was 0.
+- **`overflow-x: hidden` would have broken the sticky header** — it makes the root a scroll container; `clip` does not.
+- **The clock tumbled from `00:00` on first paint** — the plate now lands already correct.
+- **A review score measured 6 lines** — a grid row stretched the heading box; `align-items: start` fixed both.
 
-## How it was designed
+Second pass (multi-page rebuild):
 
-Built with the skills vendored in this repo, chiefly **taste-skill**'s run, with **impeccable**'s craft floor as the quality gate.
+- **The clock vanished on the home page.** `animation: var(--animate-clock-land) 640ms … forwards` repeated the duration and easing that the variable already contained, so the shorthand was invalid and the plate stayed at `opacity: 0`. Same mistake in the map halo. Both now set only the delay on top of the token.
+- **Ascenders were shaved off every display heading.** Leading is tighter than the glyph height (0.9), and the line masks clipped at the box edge, so `AR Smart Library` lost its tops. The masks now carry `padding-block` with matching negative margins, which grows the clip area without moving the layout.
+- **The page's arrow was a missing glyph.** `↗` is not in the Latin subset of the font and rendered as a fallback dash. Replaced with a drawn SVG.
+- **Two regions shared one accessible name** on the location page — the page head and the closing section were both labelled "Find the stairs beside the sweets", so axe's `landmark-unique` failed. The closing section now says something else.
+- **The membership card's eyebrow measured 3.92:1** on moss. Raised to `text-bone/90`; axe now passes at 1440/768/390.
+- **The no-JS headline read "is open at any hour any hour of the night or day"** — the visually hidden extension of the sentence now starts with a comma, so the accessible name is "AR Smart Library is open at any hour of the night or day".
+- **The compact menu's panel started behind the header** (68 px against a 66 px header) — offset corrected; Escape and outside clicks close it.
+- **A card at `bg-sand-deep` on a `bg-sand-deep` section was invisible** — cards sit one step lighter than the section they're on.
 
-1. **Direction drawn, not invented.** `draw.mjs --sector education --tone quiet` dealt three directions; `sentence-as-layout` was chosen because it can carry the one thing only this library has: the hour. The sheet then dealt Schibsted Grotesk and the sand-and-moss palette (`--seed 60`), both re-dealt from the same direction's slots rather than picked by hand.
-2. **The idea:** "On this page, the library's 24-hour promise becomes a live clock inside the sentence."
-3. **Fabrication refused.** The sheet's photography slots assume photographs exist. None of the library does, and a stock interior would misrepresent it, so those slots hold the live clock and a drawn schematic of the junction. This is the deviation from the sheet, and the reason for it.
-4. **Gated, not assumed.** `lint.mjs` (0 banned patterns) and a headless-Chromium pass over 1440/768/390 measured what the skills say to measure. `inspect.mjs` was not used: it needs a real Chrome install, which this build environment does not have.
+## Verification
 
-Two things the gate caught that would otherwise have shipped broken:
+Measured in headless Chromium against the built `dist/`, at 1440, 768 and 390:
 
-- A `clip-path` reveal clipped each heading's own intersection box to zero, so `IntersectionObserver` could never fire and **every section heading would have stayed invisible**. Replaced with a blur-and-rise reveal, with the class added by JS so the no-JS path is unaffected.
-- Star glyphs stood in for a rating icon, and the em-dash habit ran to five on the page. Both flagged by `lint.mjs` and removed.
+- axe-core, `wcag2a`/`wcag2aa`/`wcag21a`/`wcag21aa`/`best-practice`: **0 violations on all seven pages at all three widths**
+- 0 console errors, 0 failed requests, 0 horizontal overflow
+- every heading renders exactly two lines, one `<h1>` per page
+- every internal link resolves under the real `/library/` prefix; canonical, description and two JSON-LD blocks per page
+- scrolling reveals all 20 targets on the home page; the header inverts over the closing field
+- **no JavaScript**: clock reads "any hour", hero untransformed, nothing hidden
+- **reduced motion**: 0 running animations, nothing hidden, band static
+- `/library/404.html` served from the production prefix resolves every asset
 
-
-## Editing
-
-Content is plain HTML. The facts that appear more than once (address, phone, hours) are written out in each place on purpose so the page stays readable and searchable; if you change one, change all of them:
-
-- phone `+91 70705 49845` — `tel:+917070549845` in 6 links
-- address — hero, location section, footer
-- hours — hero, quick facts, location, FAQ, footer
-- ratings — quick facts and the reviews section (with the "as of" date)
+Not done, and not claimed: no real photographs; the skills' `inspect.mjs` needs a full interactive
+Chrome, which this environment does not have; and page transitions only exist in browsers that
+implement `@view-transition`.
 
 ## Deploying
 
-Pushing to `main` deploys via GitHub Actions (`.github/workflows/pages.yml`), which publishes this
-`site/` folder to GitHub Pages. No manual step, no build, no redeploy to remember. To preview locally:
-
-```bash
-cd site && python3 -m http.server 8080
-```
+Push to `main`. `.github/workflows/pages.yml` installs the two dev dependencies, runs the build,
+checks that the output contains the pages and no unfilled `{{tokens}}`, and publishes `site/dist` to
+GitHub Pages. No manual step, no redeploy to remember. A local rebuild is never required to publish.
 
 The workflow lives at the repository root because Actions only reads `.github/workflows/` there.
