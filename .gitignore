@@ -1,0 +1,6 @@
+# The site is built, not committed: `npm run build` in site/ writes dist/,
+# and the Pages workflow builds it again before deploying.
+site/node_modules/
+site/dist/
+
+.DS_Store

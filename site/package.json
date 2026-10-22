@@ -1,0 +1,16 @@
+{
+  "name": "ar-smart-library-site",
+  "private": true,
+  "version": "2.0.0",
+  "description": "Multi-page website for AR Smart Library, Namkum, Ranchi.",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --watch",
+    "serve": "python3 -m http.server 8080 --directory dist"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}

@@ -334,7 +334,26 @@
       ).observe(band);
     }
 
-    // 7. Safety net. If nothing has revealed itself a few seconds in, something
+    // 7. The compact menu: Escape closes it, and so does a tap outside.
+    var menu = document.querySelector("[data-menu]");
+    if (menu) {
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && menu.open) {
+          menu.open = false;
+          var btn = menu.querySelector("summary");
+          if (btn) btn.focus();
+        }
+      });
+      document.addEventListener("click", function (e) {
+        if (menu.open && !menu.contains(e.target)) menu.open = false;
+      });
+      // following a link inside the panel should not leave it hanging open
+      each(menu.querySelectorAll("a"), function (a) {
+        a.addEventListener("click", function () { menu.open = false; });
+      });
+    }
+
+    // 8. Safety net. If nothing has revealed itself a few seconds in, something
     //    upstream is broken: drop the gate and settle the figures, so the page
     //    is a complete static page rather than a blank one.
     window.setTimeout(function () {
