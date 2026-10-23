@@ -593,31 +593,39 @@
    less motion. A media query can only be honoured or ignored; a class can also be
    undone by the visitor who asked for it.
 
-   Hidden states additionally live behind `html.anim`, which app.js adds once its
-   observers are live. No script, a slow script or a broken one leaves a complete
-   page. */
+   Hidden states additionally live behind `html.anim`, which <head> adds before
+   the first paint and app.js claims with `anim-live`. No script, a blocked
+   script or a broken one leaves a complete page.
 
-.motion-on .js.fonts .hero-line {
+   Every gate below is a *compound* selector (`.motion-on.anim`), not a
+   descendant one (`.motion-on .anim`). All four state classes — `js`,
+   `motion-on`/`motion-off`, `fonts`, `anim` — are set on <html> itself, so a
+   descendant combinator asks for an element inside an element that does not
+   exist. Written that way, the whole motion layer silently never matched: no
+   hero rise, no scroll reveals, no line masks, no drawn map. Compound, or the
+   selector is dead. */
+
+.motion-on.js.fonts .hero-line {
   transform: translateY(105%);
   animation: var(--animate-line-up);
   animation-delay: calc(var(--i, 0) * 110ms + 120ms);
 }
 
-.motion-on .js.fonts [data-load] {
+.motion-on.js.fonts [data-load] {
   opacity: 0;
   transform: translateY(14px);
   animation: var(--animate-load-rise);
   animation-delay: var(--d, 0ms);
 }
 
-.motion-on .js.fonts .hero-clock {
+.motion-on.js.fonts .hero-clock {
   transform: translateY(-0.045em) scale(0.92);
   opacity: 0;
   animation: var(--animate-clock-land);
   animation-delay: 620ms;
 }
 
-.motion-on .anim [data-reveal] {
+.motion-on.anim [data-reveal] {
   opacity: 0;
   transform: translateY(22px);
   transition:
@@ -629,21 +637,21 @@
      the shorthand so a nested var() fallback cannot invalidate the whole rule. */
   transition-delay: var(--d, calc(var(--i, 0) * 70ms));
 }
-.motion-on .anim [data-reveal].is-in { opacity: 1; transform: none; }
-.motion-on .anim [data-reveal][data-lines] { transform: none; }
+.motion-on.anim [data-reveal].is-in { opacity: 1; transform: none; }
+.motion-on.anim [data-reveal][data-lines] { transform: none; }
 
-.motion-on .anim [data-lines] .lines__row > span {
+.motion-on.anim [data-lines] .lines__row > span {
   transform: translateY(104%);
   transition: transform 950ms var(--ease-expo) calc(var(--i, 0) * 90ms + 60ms);
 }
-.motion-on .anim [data-lines].is-in .lines__row > span { transform: none; }
+.motion-on.anim [data-lines].is-in .lines__row > span { transform: none; }
 
-.motion-on .anim [data-stagger] > * {
+.motion-on.anim [data-stagger] > * {
   opacity: 0;
   transform: translateY(16px);
   transition: opacity 620ms var(--ease-out), transform 760ms var(--ease-out);
 }
-.motion-on .anim [data-stagger].is-in > * {
+.motion-on.anim [data-stagger].is-in > * {
   opacity: 1;
   transform: none;
   transition-delay: calc(var(--i, 0) * 70ms);
@@ -662,11 +670,11 @@
 }
 .motion-on .band.is-off { --band-state: paused; }
 
-.motion-on .anim .map__route { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1100ms var(--ease-inout) 420ms; }
-.motion-on .anim .map__route-tip { stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; transition: stroke-dashoffset 300ms var(--ease-out) 1350ms, opacity 200ms linear 1350ms; }
-.motion-on .anim .map.is-in .map__route { stroke-dashoffset: 0; }
-.motion-on .anim .map.is-in .map__route-tip { stroke-dashoffset: 0; opacity: 1; }
-.motion-on .anim .map.is-in .map__marker-halo {
+.motion-on.anim .map__route { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1100ms var(--ease-inout) 420ms; }
+.motion-on.anim .map__route-tip { stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; transition: stroke-dashoffset 300ms var(--ease-out) 1350ms, opacity 200ms linear 1350ms; }
+.motion-on.anim .map.is-in .map__route { stroke-dashoffset: 0; }
+.motion-on.anim .map.is-in .map__route-tip { stroke-dashoffset: 0; opacity: 1; }
+.motion-on.anim .map.is-in .map__marker-halo {
   animation: halo 900ms var(--ease-out) 1350ms 1 both;
 }
 
