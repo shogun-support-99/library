@@ -419,18 +419,31 @@
       });
     }
 
-    // 8. The motion switch. A device can ask for less motion, and a media query
-    //    can only be obeyed or ignored: this gives the visitor the choice back,
-    //    without a reload. Hidden in the markup, revealed here, so it is never a
-    //    dead control when the script does not run.
+    // 8. The motion switch, in two places for one reason: a page with the
+    //    animations off looks exactly like a page whose animations are broken,
+    //    and the footer switch is a full screen of scrolling away from the one
+    //    person who needs it. So while the layer is off, a small fixed note says
+    //    so and offers the switch. It goes away the moment the layer is on.
     var motionWrap = document.querySelector("[data-motion]");
     var motionBtn = motionWrap && motionWrap.querySelector("[data-motion-toggle]");
     if (motionWrap && motionBtn) {
       var mq = window.matchMedia("(prefers-reduced-motion: reduce)");
       var motionText = motionWrap.querySelector("[data-motion-text]");
+      var note = null;
 
       var motionOn = function () {
         return root.classList.contains("motion-on");
+      };
+
+      // "chosen" is a remembered choice from an earlier visit, "just" is this
+      // visit's click: saying "switched off here before" about something the
+      // visitor did two seconds ago reads like the site cannot see them.
+      var whyOff = function () {
+        var why = root.getAttribute("data-motion-why");
+        if (why === "device") return "your computer is set to reduce motion";
+        if (why === "just") return "you switched them off just now";
+        if (why === "chosen" || why === "link") return "they were switched off here before";
+        return mq.matches ? "your computer is set to reduce motion" : "they are switched off";
       };
 
       var syncSwitch = function () {
@@ -447,21 +460,91 @@
               : "Animations are off.";
         }
         motionWrap.hidden = false;
+        syncNote();
       };
 
-      motionBtn.addEventListener("click", function () {
-        var next = motionOn() ? "off" : "on";
+      // The note is built here rather than in the markup: no script, no note,
+      // and no dead control. It is not an alert — nothing is wrong with the
+      // page — so it is a plain labelled region.
+      var buildNote = function () {
+        note = document.createElement("div");
+        note.className = "motion-note";
+        note.setAttribute("role", "region");
+        note.setAttribute("aria-label", "Animation settings");
+
+        var text = document.createElement("p");
+        text.className = "motion-note__text";
+
+        var on2 = document.createElement("button");
+        on2.type = "button";
+        on2.className = "motion-note__on";
+        on2.setAttribute("data-note-on", "");
+        on2.textContent = "Turn them on";
+
+        var x = document.createElement("button");
+        x.type = "button";
+        x.className = "motion-note__x";
+        x.setAttribute("data-note-x", "");
+        x.setAttribute("aria-label", "Dismiss");
+        x.textContent = "\u00d7";
+
+        note.appendChild(text);
+        note.appendChild(on2);
+        note.appendChild(x);
+
+        on2.addEventListener("click", function () {
+          setMotion("on");
+        });
+        x.addEventListener("click", function () {
+          note.hidden = true;
+          try {
+            sessionStorage.setItem("arsl-note", "x");
+          } catch (err) {}
+        });
+
+        document.body.appendChild(note);
+      };
+
+      var syncNote = function () {
+        var on = motionOn();
+        if (on) {
+          if (note) note.hidden = true;
+          return;
+        }
+        // built on first need, so turning the layer off from the footer mid-visit
+        // is announced the same way as arriving with it already off
+        if (!note) buildNote();
+        var dismissed = false;
+        try {
+          dismissed = sessionStorage.getItem("arsl-note") === "x";
+        } catch (err) {}
+        if (dismissed) {
+          note.hidden = true;
+          return;
+        }
+        note.querySelector(".motion-note__text").textContent =
+          "Animations are off: " + whyOff() + ".";
+        note.hidden = false;
+      };
+
+      var setMotion = function (next) {
         root.classList.remove("motion-on", "motion-off");
         root.classList.add("motion-" + next);
+        root.setAttribute("data-motion-why", "just");
         try {
           localStorage.setItem("arsl-motion", next);
         } catch (err) {
           /* private mode: the choice lasts for this page only */
         }
         syncSwitch();
+      };
+
+      motionBtn.addEventListener("click", function () {
+        setMotion(motionOn() ? "off" : "on");
       });
 
       if (mq.addEventListener) mq.addEventListener("change", syncSwitch);
+
       syncSwitch();
     }
 

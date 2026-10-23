@@ -584,6 +584,47 @@
   }
   .foot__motion button:hover { @apply border-field-ink bg-field-ink/10; }
   .foot__motion button:focus-visible { outline-color: var(--color-field-ink); }
+
+  /* The motion note. Everything here is deliberately unmissable and quiet at the
+     same time: it only exists while the animations are off, which is the one
+     state a visitor cannot diagnose for themselves. Fixed, because the reason
+     they cannot see it otherwise is that the other switch is at the foot of the
+     page — exactly where someone looking at a still page will not scroll to. */
+  .motion-note {
+    position: fixed;
+    z-index: 60;
+    inset-inline-start: max(12px, env(safe-area-inset-left));
+    inset-block-end: max(12px, env(safe-area-inset-bottom));
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 0.7rem;
+    max-inline-size: min(27rem, calc(100vw - 24px));
+    padding: 0.6rem 0.6rem 0.6rem 0.85rem;
+    border: 1px solid color-mix(in oklab, var(--color-ink) 22%, transparent);
+    border-radius: 3px;
+    background: var(--color-bone);
+    color: var(--color-ink);
+    box-shadow: 0 10px 30px rgb(0 0 0 / 0.18);
+    font-size: 12.5px;
+    line-height: 1.35;
+  }
+  .motion-note[hidden] { display: none; }
+  .motion-note__text { flex: 1 1 12rem; margin: 0; }
+  .motion-note__on {
+    @apply cursor-pointer rounded-[2px] border border-transparent px-2.5 py-1
+           text-[12.5px] font-semibold transition-colors duration-200;
+    background: var(--color-moss);
+    color: var(--color-bone);
+  }
+  .motion-note__on:hover { background: var(--color-moss-deep); }
+  .motion-note__on:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
+  .motion-note__x {
+    @apply cursor-pointer rounded-[2px] border-0 bg-transparent px-1.5 py-0.5 text-[15px] leading-none;
+    color: var(--color-muted);
+  }
+  .motion-note__x:hover { color: var(--color-ink); }
+  .motion-note__x:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
 }
 
 /* --------------------------------------------------------- motion layer

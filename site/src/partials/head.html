@@ -6,17 +6,44 @@
 <script>
 /* The motion layer is a class, resolved before the first paint: the device's
    reduced-motion setting is the default, a stored choice wins over it, and either
-   way the class can be flipped later without a reload. */
+   way the class can be flipped later without a reload.
+
+   `data-motion-why` records *why* the layer is off, because "off" on its own is
+   indistinguishable from broken — a laptop with "reduce motion" switched on in
+   its accessibility settings gets a still page, and so does a browser that
+   remembers an earlier "turn them off". The page says which one it is.
+
+   ?motion=on / ?motion=off wins over both and is remembered, so there is a way
+   back that does not depend on finding a setting in an operating system. */
 (function () {
+  var r = document.documentElement;
   var m = "on";
+  var why = "default";
+
+  var asked = (location.search.match(/[?&]motion=(on|off)/) || [])[1];
+  var saved = null;
   try {
-    var saved = localStorage.getItem("arsl-motion");
-    if (saved === "on" || saved === "off") m = saved;
-    else if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) m = "off";
+    saved = localStorage.getItem("arsl-motion");
   } catch (e) {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) m = "off";
+    /* private mode: no memory, the device setting decides */
   }
-  document.documentElement.classList.add("motion-" + m);
+
+  if (asked) {
+    m = asked;
+    why = "link";
+    try {
+      localStorage.setItem("arsl-motion", asked);
+    } catch (e) {}
+  } else if (saved === "on" || saved === "off") {
+    m = saved;
+    why = "chosen";
+  } else if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    m = "off";
+    why = "device";
+  }
+
+  r.classList.add("motion-" + m);
+  r.setAttribute("data-motion-why", why);
 })();
 </script>
 <script>
@@ -63,7 +90,7 @@
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="styles.css?v=5">
+<link rel="stylesheet" href="styles.css?v=6">
 {{JSONLD}}
 {{ANALYTICS}}
 </head>
