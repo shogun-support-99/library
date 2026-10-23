@@ -175,11 +175,18 @@ Second pass (multi-page rebuild):
 - **The sitemap stamped every page as modified on every build.** `<lastmod>` was the build date, which makes the field noise. Removed rather than faked.
 - **A device that asked for reduced motion got no way back.** The whole motion layer lived inside `@media (prefers-reduced-motion: no-preference)`, so a laptop with "reduce motion" switched on in the OS showed a frozen site with no control. Motion is now class-gated and the footer offers a switch.
 
+Third pass (scroll animation):
+
+- **The entire scroll animation layer never ran.** Every motion rule was written `.motion-on .anim …`, a descendant combinator, but `motion-on` and `anim` are both classes on the `<html>` element — no element sits inside itself, so not one of those fifteen rules could ever match. Nothing rose, nothing revealed, no heading line was masked, the map never drew itself, and the two "fixed" bugs above were fixed into a selector that does not apply. They are compound selectors now (`.motion-on.anim`), and the comment in `input.css` says why, because this class of bug is invisible: the site looks fine, it just never animates.
+- **Sections already on screen were left permanently blank.** The reveal observer uses `rootMargin: 0 0 -12% 0`, so an element sitting exactly at the fold is on screen but never counts as intersecting. The facts row is at 768–836 px on a 800 px laptop, which is inside that strip: visible, hidden, and never revealed until the visitor nudged the page. Anything inside the viewport when the gate lands is now shown on the next frame.
+- **The three-second safety net cancelled the reveals it was meant to protect.** It asked "has anything revealed itself yet?" and treated "no" as failure. Nothing below the fold *can* have revealed itself before the visitor scrolls, so on a page whose first reveal clears the fold the answer was always no: the gate was dropped, every scroll reveal was dead for the rest of the visit, and the pending digit rolls were settled early on top of it. Silence now only counts as failure when the observer never delivered a single record, and a background tab is given until the tab is looked at.
+- **Hiding the page late made every section blink.** With the gate opening in `app.js` ~100 ms after first paint, each section painted in place and then faded *out* as the hidden state landed. The gate is now set by an inline `<head>` script before the first paint; `app.js` claims it with `anim-live` and a 2.5 s fallback drops it if the script never arrives, so a blocked or broken bundle still leaves a complete page.
+
 ## Verification
 
 Measured in headless Chromium against the built `dist/`, at 1440, 768 and 390:
 
-- axe-core, `wcag2a`/`wcag2aa`/`wcag21a`/`wcag21aa`/`best-practice`: **0 violations on all seven pages at all three widths**
+- axe-core, `wcag2a`/`wcag2aa`/`wcag21a`/`wcag21aa`/`best-practice`: **0 violations on all seven pages at all three widths**, re-run against the built `dist/` after the scroll-motion changes (21 page/viewport pairs, each scrolled through first so axe judges the page a reader reaches)
 - 0 console errors, 0 failed requests, 0 horizontal overflow
 - every heading renders exactly two lines, one `<h1>` per page
 - every internal link resolves under the real `/library/` prefix; canonical, description and two JSON-LD blocks per page
@@ -190,6 +197,20 @@ Measured in headless Chromium against the built `dist/`, at 1440, 768 and 390:
 - the motion switch was exercised in jsdom: class set before paint, toggle flips `motion-on`/`motion-off`, the label follows the state, the choice persists in `localStorage`, and no console errors occur in either mode
 - `/library/404.html` served from the production prefix resolves every asset
 - the Vercel copy serves all seven pages, `styles.css`, `sitemap.xml` and a custom 404 at the site root, with canonical URLs and sitemap entries pointing at `https://arsmartlibrary-psi.vercel.app/`
+
+Scroll motion was then measured frame by frame in the same browser (1440, 1280, 768, 390):
+
+- all 7 pages × 4 widths: every `[data-reveal]` reaches `opacity: 1` after a normal scroll, every
+  heading line leaves its mask, the map route finishes drawing, 0 console errors
+- the facts row starts at `opacity: 0` and ramps to 1 over ~700 ms with its 70 ms stagger, the
+  intro heading fades in on scroll rather than appearing, and nothing fades out on arrival
+- reduced motion: 0 hidden elements; no JavaScript at all: 0 hidden elements; `app.js` blocked:
+  the gate stands itself down at 2.5 s and 0 elements stay hidden
+- the footer switch flips `motion-on`/`motion-off` live, persists across a reload, and reveals
+  everything immediately when turned off
+- the band scrolls only while it is in view (`animation-play-state: running`), the FAQ accordion
+  opens and closes through `::details-content`, the header goes `is-stuck` at 40 px and `is-dark`
+  over the closing field
 
 Not done, and not claimed: no real photographs; the skills' `inspect.mjs` needs a full interactive
 Chrome, which this environment does not have; and page transitions only exist in browsers that

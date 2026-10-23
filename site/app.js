@@ -259,35 +259,62 @@
     // 3. Figures get their rolling columns.
     registerRolls(document.body);
 
-    // 4. Now it is safe to hide things: the observers below exist.
-    root.classList.add("anim");
+    // 4. The hidden state was already set in <head>, before the first paint, so
+    //    nothing is painted fully formed and then snatched away. All that is left
+    //    is to claim the gate. If the <head> fallback has already stood it down
+    //    (this script was slow to arrive), the page is simply shown.
+    var gated = root.classList.contains("anim");
 
     var io = null;
+    var ioSpoke = false; // has the observer delivered a single record yet?
 
-    if (hasIO) {
+    function reveal(el) {
+      if (el.classList.contains("is-in")) return;
+      el.classList.add("is-in");
+      settleWithin(el);
+    }
+
+    function showEverything() {
+      root.classList.remove("anim");
+      each(document.querySelectorAll("[data-reveal]"), reveal);
+      rolls.forEach(function (r) { settle(r.tracks); });
+      rolls = [];
+    }
+
+    if (gated && hasIO) {
+      root.classList.add("anim-live"); // tell <head> not to drop the gate
       io = new IntersectionObserver(
         function (entries) {
+          ioSpoke = true;
           entries.forEach(function (entry) {
             if (!entry.isIntersecting) return;
-            entry.target.classList.add("is-in");
-            settleWithin(entry.target);
+            reveal(entry.target);
             io.unobserve(entry.target);
           });
         },
         { rootMargin: "0px 0px -12% 0px", threshold: 0.08 }
       );
 
+      // The -12% margin is there so a section reveals once it is properly in
+      // view rather than the moment its first pixel clears the fold. The cost is
+      // that a strip sitting *at* the fold — the facts row, on a laptop — is on
+      // screen but never counts as intersecting, so it stayed blank until the
+      // visitor nudged the page. Anything already in the viewport when the
+      // hidden state lands is shown on the next frame instead, after that hidden
+      // state has been committed, so its stagger still plays.
+      var vh = window.innerHeight;
       each(document.querySelectorAll("[data-reveal]"), function (el) {
-        io.observe(el);
+        if (el.getBoundingClientRect().top < vh) {
+          window.requestAnimationFrame(function () {
+            window.requestAnimationFrame(function () { reveal(el); });
+          });
+        } else {
+          io.observe(el);
+        }
       });
     } else {
-      // No IntersectionObserver: show everything rather than hide it.
-      root.classList.remove("anim");
-      each(document.querySelectorAll("[data-reveal]"), function (el) {
-        el.classList.add("is-in");
-      });
-      rolls.forEach(function (r) { settle(r.tracks); });
-      rolls = [];
+      // No observer, or a gate already dropped: show the page rather than hide it.
+      showEverything();
     }
 
     startClock();
@@ -438,16 +465,32 @@
       syncSwitch();
     }
 
-    // 9. Safety net. If nothing has revealed itself a few seconds in, something
-    //    upstream is broken: drop the gate and settle the figures, so the page
-    //    is a complete static page rather than a blank one.
-    window.setTimeout(function () {
-      if (!document.querySelector("[data-reveal].is-in")) {
-        root.classList.remove("anim");
+    // 9. Safety net, for an observer that is broken rather than merely quiet.
+    //
+    //    This used to ask "has anything revealed itself yet?" three seconds in,
+    //    and treat "no" as proof of failure. But nothing below the fold *can*
+    //    have revealed itself before the visitor scrolls, so on any page whose
+    //    first reveal clears the fold the answer was legitimately no: the gate
+    //    was dropped, every scroll reveal was cancelled for the rest of the
+    //    visit, and the pending digit rolls were settled early on top of it.
+    //    Silence only means failure when the observer never spoke at all — it
+    //    always delivers one initial record per target, intersecting or not.
+    //    A background tab is the one honest reason for silence, so wait for it.
+    function safetyCheck() {
+      if (!hasIO || ioSpoke) return;
+
+      if (document.hidden) {
+        document.addEventListener("visibilitychange", function again() {
+          document.removeEventListener("visibilitychange", again);
+          window.setTimeout(safetyCheck, 1200);
+        });
+        return;
       }
-      rolls.forEach(function (r) { settle(r.tracks); });
-      rolls = [];
-    }, 3000);
+
+      showEverything();
+    }
+
+    window.setTimeout(safetyCheck, 3000);
   }
 
   /* The load sequence waits for the webfont, so the lines rise in the real face
