@@ -3,6 +3,22 @@
 <head>
 <meta charset="utf-8">
 <script>document.documentElement.classList.add('js');</script>
+<script>
+/* The motion layer is a class, resolved before the first paint: the device's
+   reduced-motion setting is the default, a stored choice wins over it, and either
+   way the class can be flipped later without a reload. */
+(function () {
+  var m = "on";
+  try {
+    var saved = localStorage.getItem("arsl-motion");
+    if (saved === "on" || saved === "off") m = saved;
+    else if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) m = "off";
+  } catch (e) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) m = "off";
+  }
+  document.documentElement.classList.add("motion-" + m);
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{TITLE}}</title>
 <meta name="description" content="{{DESC}}">
@@ -34,7 +50,7 @@
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="styles.css?v=2">
+<link rel="stylesheet" href="styles.css?v=3">
 {{JSONLD}}
 {{ANALYTICS}}
 </head>
