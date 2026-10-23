@@ -182,6 +182,13 @@ Third pass (scroll animation):
 - **The three-second safety net cancelled the reveals it was meant to protect.** It asked "has anything revealed itself yet?" and treated "no" as failure. Nothing below the fold *can* have revealed itself before the visitor scrolls, so on a page whose first reveal clears the fold the answer was always no: the gate was dropped, every scroll reveal was dead for the rest of the visit, and the pending digit rolls were settled early on top of it. Silence now only counts as failure when the observer never delivered a single record, and a background tab is given until the tab is looked at.
 - **Hiding the page late made every section blink.** With the gate opening in `app.js` ~100 ms after first paint, each section painted in place and then faded *out* as the hidden state landed. The gate is now set by an inline `<head>` script before the first paint; `app.js` claims it with `anim-live` and a 2.5 s fallback drops it if the script never arrives, so a blocked or broken bundle still leaves a complete page.
 
+Fourth pass (a desktop that shows no animation):
+
+- **"No animation on my laptop" was not a bug report that could be disproved.** A desktop with *reduce motion* switched on in its accessibility settings — one toggle, easy to have set and forget — gets `motion-off` before the first paint, and there is no visible difference between "the animation layer is switched off" and "the animation layer is broken". The only control was in the footer, a full screen of scrolling away from someone looking at a still hero. The page now says which it is: while the layer is off, a small fixed note reads "Animations are off: your computer is set to reduce motion." with a **Turn them on** button and a dismiss. It is built by `app.js`, so with no script there is no dead control, and it disappears the instant the layer is on.
+- **The reason for the state was not recorded.** `data-motion-why` now carries `default`, `device`, `chosen` or `link`, so the note can distinguish "your computer asked for less motion" from "they were switched off here before" instead of guessing.
+- **`?motion=on` and `?motion=off` work.** They beat the device setting and are remembered, giving a way back that does not involve hunting for an OS toggle.
+- **`app.js` had no cache-buster.** It was the one asset pinned to nothing while the stylesheet moved from `v4` to `v5`, so a browser holding an old copy kept old behaviour against new markup. Both are at `v6` now.
+
 ## Verification
 
 Measured in headless Chromium against the built `dist/`, at 1440, 768 and 390:
