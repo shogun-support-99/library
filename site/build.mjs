@@ -208,7 +208,10 @@ async function build() {
   }
 
   const priority = { "index": "1.0", location: "0.9", about: "0.8", facilities: "0.8", membership: "0.8" };
-  const today = new Date().toISOString().slice(0, 10);
+  /* No <lastmod>. It used to be the build date, which stamped every page as
+     modified on every deploy and made the field meaningless — worse than
+     omitting it, because a crawler that learns the value is noise stops trusting
+     the file. */
   const urls = files
     .map((f) => f.replace(".html", ""))
     .filter((slug) => slug !== "404")
@@ -217,7 +220,6 @@ async function build() {
       [
         "  <url>",
         `    <loc>${canonical(slug)}</loc>`,
-        `    <lastmod>${today}</lastmod>`,
         "    <changefreq>monthly</changefreq>",
         `    <priority>${priority[slug] || "0.7"}</priority>`,
         "  </url>",

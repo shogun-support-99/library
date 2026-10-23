@@ -345,12 +345,16 @@
     margin-left: 0.08em;
   }
   .clock__time { @apply inline-block; }
-  /* the clause is only needed once the plate hides the no-script words */
+  /* The swap to the live plate waits for `clock-ready`, which app.js adds only
+     after the digits are built. A plain `.js` gate was not enough: the class is
+     set by an inline script in <head>, so a failed or blocked app.js left the
+     headline reading "is open at --:--" for ever, and repeated "any hour" to a
+     screen reader. Until the clock is real, the words stay. */
   .clock__sr { display: none; }
-  .js .clock__sr { display: inline; }
+  .js.clock-ready .clock__sr { display: inline; }
   .clock__js { display: none; }
-  .js .clock__nojs { display: none; }
-  .js .clock__js {
+  .js.clock-ready .clock__nojs { display: none; }
+  .js.clock-ready .clock__js {
     @apply inline-block text-center;
     inline-size: 2.98em;
     font-variant-numeric: tabular-nums;
@@ -617,8 +621,13 @@
   opacity: 0;
   transform: translateY(22px);
   transition:
-    opacity 700ms var(--ease-out) var(--d, 0ms),
-    transform 900ms var(--ease-out) var(--d, 0ms);
+    opacity 700ms var(--ease-out),
+    transform 900ms var(--ease-out);
+  /* --d is an explicit delay; --i is the item's place in its row. Sixteen
+     elements in the markup set --i and nothing read it, so the facts and the
+     score cards all arrived together. Both now work. The delay lives outside
+     the shorthand so a nested var() fallback cannot invalidate the whole rule. */
+  transition-delay: var(--d, calc(var(--i, 0) * 70ms));
 }
 .motion-on .anim [data-reveal].is-in { opacity: 1; transform: none; }
 .motion-on .anim [data-reveal][data-lines] { transform: none; }

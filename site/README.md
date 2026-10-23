@@ -64,11 +64,15 @@ Local preview:
 
 ```bash
 cd site
-npm install
+npm ci
 npm run dev      # builds, then rebuilds on src/ changes
 # in another shell
-npm run serve    # http://localhost:8080
+npm run serve    # http://localhost:8080  (and http://localhost:8080/library/)
 ```
+
+`serve.mjs` serves `dist` at **both** mount points. It has to: the default build is mounted at
+`/library/` for GitHub Pages, so a plain static server at `/` returns 404 for every stylesheet, script
+and internal link — the preview used to look broken for exactly that reason.
 
 ## Styling
 
@@ -163,6 +167,12 @@ Second pass (multi-page rebuild):
 - **The marquee froze under a resting mouse.** Pause-on-hover was applied to the band's full width, so a pointer parked anywhere across the page stopped it — invisible on a phone, where there is no hover. Hover-pause is gone; the off-screen pause stays.
 - **The header's scroll handler forced a layout on every frame.** It read `offsetHeight` and `getBoundingClientRect()` after toggling classes, which is a synchronous reflow per frame. Measurements are now cached, refreshed through a `ResizeObserver`, and only written when a state actually changes.
 - **`text-rendering: optimizeLegibility` was set globally.** Chrome's own guidance is to avoid it: it enables extra shaping on every text run, and the cost grows with viewport width. Removed.
+- **A failed `app.js` left the headline reading "is open at `--:--`".** The no-script/scripted swap was gated on `html.js`, which an inline script sets before anything else runs — so if the bundle 404'd or threw, the words were hidden and the empty plate showed for ever, and a screen reader heard "any hour" twice. The swap now waits for `html.clock-ready`, which `app.js` sets only once the digits exist.
+- **Sixteen elements asked for a stagger that never happened.** `[data-reveal]` items carry `--i` (0, 1, 2 …) but the transition only read `--d`, so the facts row and both score cards arrived as one block. Both variables work now: `--d` for an explicit delay, `--i` for a position.
+- **The sticky header turned pale over the dark footer.** The inverted state ended at the bottom of `.close`; past that the header was sand-coloured while sitting on the dark field. The dark region runs to the end of the document, so the lower bound is gone.
+- **`npm run serve` showed a broken site.** It was `python3 -m http.server --directory dist`, which serves at `/`, while the default build is mounted at `/library/`. Replaced with a dependency-free `serve.mjs` that answers both.
+- **Search-result descriptions were over the line.** Five pages carried 164–187 characters; Google truncates around 160. All eight are now 105–149.
+- **The sitemap stamped every page as modified on every build.** `<lastmod>` was the build date, which makes the field noise. Removed rather than faked.
 - **A device that asked for reduced motion got no way back.** The whole motion layer lived inside `@media (prefers-reduced-motion: no-preference)`, so a laptop with "reduce motion" switched on in the OS showed a frozen site with no control. Motion is now class-gated and the footer offers a switch.
 
 ## Verification
@@ -176,7 +186,8 @@ Measured in headless Chromium against the built `dist/`, at 1440, 768 and 390:
 - scrolling reveals all 20 targets on the home page; the header inverts over the closing field
 - **no JavaScript**: clock reads "any hour", hero untransformed, nothing hidden
 - **reduced motion**: 0 running animations, nothing hidden, band static — and the footer switch turns it back on
-- the motion switch was exercised in jsdom: class set before paint, toggle flips `motion-on`/`motion-off`, label and `aria-pressed` follow, choice persists in `localStorage`, no console errors in either mode
+- local preview answers `/` and `/library/` identically, with traversal attempts rejected
+- the motion switch was exercised in jsdom: class set before paint, toggle flips `motion-on`/`motion-off`, the label follows the state, the choice persists in `localStorage`, and no console errors occur in either mode
 - `/library/404.html` served from the production prefix resolves every asset
 - the Vercel copy serves all seven pages, `styles.css`, `sitemap.xml` and a custom 404 at the site root, with canonical URLs and sitemap entries pointing at `https://arsmartlibrary-psi.vercel.app/`
 

@@ -210,6 +210,10 @@
     if (!clockEl) return;
     buildClock();
     renderClock(true);
+    // The plate only replaces the words once there are digits behind it. If
+    // anything above returned early, `clock-ready` is never set and the
+    // headline keeps reading "any hour" instead of "--:--".
+    if (clockTracks && clockTracks.length) root.classList.add("clock-ready");
     scheduleClock();
     // a backgrounded tab can miss timers; catch up on return
     document.addEventListener("visibilitychange", function () {
@@ -304,16 +308,12 @@
       var ticking = false;
       var headerH = 0;
       var darkTop = 0;
-      var darkH = 0;
       var wasStuck = null;
       var wasDark = null;
 
       var measure = function () {
         headerH = header.offsetHeight;
-        if (dark) {
-          darkTop = dark.getBoundingClientRect().top + window.scrollY;
-          darkH = dark.offsetHeight;
-        }
+        if (dark) darkTop = dark.getBoundingClientRect().top + window.scrollY;
       };
 
       var paint = function () {
@@ -327,8 +327,12 @@
         }
 
         if (dark) {
-          var top = darkTop - y;
-          var isDark = top <= headerH && top > -darkH;
+          // The dark field starts at .close and runs to the end of the page, so
+          // there is no lower bound to check: past the top of .close the header
+          // is over dark ground until the document ends. The old version ended
+          // the state at the bottom of .close, which turned the sticky header
+          // sand-coloured while it sat over the dark footer.
+          var isDark = darkTop - y <= headerH;
           if (isDark !== wasDark) {
             header.classList.toggle("is-dark", isDark);
             wasDark = isDark;
@@ -404,8 +408,10 @@
 
       var syncSwitch = function () {
         var on = motionOn();
+        // The label states the action, so this is a plain button: aria-pressed
+        // on a button whose name changes announces itself as
+        // "Turn them off, pressed", which contradicts the name.
         motionBtn.textContent = on ? "Turn them off" : "Turn them on";
-        motionBtn.setAttribute("aria-pressed", on ? "true" : "false");
         if (motionText) {
           motionText.textContent = on
             ? "Animations are on."
