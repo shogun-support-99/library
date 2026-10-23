@@ -108,7 +108,7 @@ confirmed. Membership pricing sends visitors to the phone.
 | On load | Headline rises line by line from its own baseline; the clock plate scales in; lede and actions rise 100 ms apart |
 | Every page head | Eyebrow, headline, lede and rule arrive in sequence |
 | Quick facts | Figures roll digit by digit when the row arrives, staggered left to right |
-| Band | A marquee, paused on hover and whenever it is off screen |
+| Band | A marquee, paused whenever it is off screen — it never pauses on hover, because it is full-bleed and a resting mouse would freeze it |
 | Section headings | Resolve line by line, not as one block |
 | Lists and copy | Staggered children, 70 ms apart |
 | The map | The route from the chowk to the door draws itself, then the marker pulses once |
@@ -122,8 +122,16 @@ exist, and the hero's load sequence sits behind `html.fonts` so lines rise in th
 than mid-font-swap. With no script, a slow script or a broken one, every page is complete and readable.
 A 3-second watchdog drops the gate if nothing has revealed itself.
 
-**Reduced motion** is not zero motion: travel goes, while colour, the −/+ state and the figures' final
-values stay. Verified: 0 running animations, nothing left hidden.
+**Who gets motion** is a class, not a media query: `html.motion-on` or `html.motion-off`, set by an
+inline script in `<head>` before the first paint. The default is the device's own
+`prefers-reduced-motion` setting; the footer carries a switch that flips it and remembers the choice in
+`localStorage`. A media query can only be obeyed or ignored — if a laptop's OS reports "reduce motion",
+a media-query build shows that visitor a completely static page with no way back. The class keeps the
+respect and restores the choice. Under `motion-off` nothing is hidden at all, so no missing observer can
+strand a section; colour, the −/+ state and the figures' final values stay.
+
+With JavaScript disabled no `.motion-*` class is set, so the page is static — the same page the no-JS
+guarantee already produced, minus the marquee.
 
 No animation library, no scroll hijack, one rAF-throttled scroll handler, and the clock ticks on the
 minute boundary rather than every second.
@@ -152,6 +160,10 @@ Second pass (multi-page rebuild):
 - **The no-JS headline read "is open at any hour any hour of the night or day"** — the visually hidden extension of the sentence now starts with a comma, so the accessible name is "AR Smart Library is open at any hour of the night or day".
 - **The compact menu's panel started behind the header** (68 px against a 66 px header) — offset corrected; Escape and outside clicks close it.
 - **A card at `bg-sand-deep` on a `bg-sand-deep` section was invisible** — cards sit one step lighter than the section they're on.
+- **The marquee froze under a resting mouse.** Pause-on-hover was applied to the band's full width, so a pointer parked anywhere across the page stopped it — invisible on a phone, where there is no hover. Hover-pause is gone; the off-screen pause stays.
+- **The header's scroll handler forced a layout on every frame.** It read `offsetHeight` and `getBoundingClientRect()` after toggling classes, which is a synchronous reflow per frame. Measurements are now cached, refreshed through a `ResizeObserver`, and only written when a state actually changes.
+- **`text-rendering: optimizeLegibility` was set globally.** Chrome's own guidance is to avoid it: it enables extra shaping on every text run, and the cost grows with viewport width. Removed.
+- **A device that asked for reduced motion got no way back.** The whole motion layer lived inside `@media (prefers-reduced-motion: no-preference)`, so a laptop with "reduce motion" switched on in the OS showed a frozen site with no control. Motion is now class-gated and the footer offers a switch.
 
 ## Verification
 
@@ -163,7 +175,8 @@ Measured in headless Chromium against the built `dist/`, at 1440, 768 and 390:
 - every internal link resolves under the real `/library/` prefix; canonical, description and two JSON-LD blocks per page
 - scrolling reveals all 20 targets on the home page; the header inverts over the closing field
 - **no JavaScript**: clock reads "any hour", hero untransformed, nothing hidden
-- **reduced motion**: 0 running animations, nothing hidden, band static
+- **reduced motion**: 0 running animations, nothing hidden, band static — and the footer switch turns it back on
+- the motion switch was exercised in jsdom: class set before paint, toggle flips `motion-on`/`motion-off`, label and `aria-pressed` follow, choice persists in `localStorage`, no console errors in either mode
 - `/library/404.html` served from the production prefix resolves every asset
 - the Vercel copy serves all seven pages, `styles.css`, `sitemap.xml` and a custom 404 at the site root, with canonical URLs and sitemap entries pointing at `https://arsmartlibrary-psi.vercel.app/`
 

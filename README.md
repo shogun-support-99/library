@@ -80,7 +80,8 @@ Measured in headless Chromium against the built `dist/` at 1440, 768 and 390:
 - **axe-core: 0 violations** on all seven pages at all three widths (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, best-practice)
 - 0 console errors, 0 failed requests, 0 horizontal overflow
 - one `<h1>` per page, two JSON-LD blocks per page, canonical + description everywhere
-- complete without JavaScript, and with `prefers-reduced-motion` (0 running animations, nothing hidden)
+- complete without JavaScript, and with reduced motion (0 running animations, nothing hidden) — the
+  footer switch hands motion back to anyone whose device asked for less
 
 Not claimed: there are no photographs of the library, and page transitions are progressive enhancement
 only, for browsers that implement `@view-transition`.

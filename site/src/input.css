@@ -114,7 +114,7 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
     /* clip, not hidden: hidden makes html a scroll container and breaks the
        sticky masthead; clip does not */
     overflow-x: clip;
@@ -129,7 +129,6 @@
     letter-spacing: -0.011em;
     font-synthesis: none;
     -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
     overflow-x: clip;
     scrollbar-color: var(--color-moss) var(--color-sand-deep);
     --header-h: 68px;
@@ -149,12 +148,18 @@
   summary { list-style: none; }
   summary::-webkit-details-marker { display: none; }
 
+  html.motion-on { scroll-behavior: smooth; }
+
   /* anchors clear the sticky masthead */
   section[id], [id="top"] { scroll-margin-top: calc(var(--header-h) + 16px); }
 }
 
-/* page-to-page transitions, where the browser has them */
-@view-transition { navigation: auto; }
+/* page-to-page transitions, where the browser has them. The media query is the
+   one thing still gated natively: @view-transition is a top-level rule and cannot
+   read a class. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+}
 
 /* ------------------------------------------------------------ components */
 
@@ -517,18 +522,16 @@
   .faq details[open] .faq__sign::after { transform: rotate(90deg); opacity: 0; }
 
   @supports (interpolate-size: allow-keywords) {
-    @media (prefers-reduced-motion: no-preference) {
-      .faq details::details-content {
-        block-size: 0;
-        overflow: hidden;
-        opacity: 0;
-        transition:
-          block-size 420ms var(--ease-out),
-          opacity 300ms ease,
-          content-visibility 420ms allow-discrete;
-      }
-      .faq details[open]::details-content { block-size: auto; opacity: 1; }
+    .motion-on .faq details::details-content {
+      block-size: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition:
+        block-size 420ms var(--ease-out),
+        opacity 300ms ease,
+        content-visibility 420ms allow-discrete;
     }
+    .motion-on .faq details[open]::details-content { block-size: auto; opacity: 1; }
   }
 
   /* ---------------- the closing field */
@@ -565,110 +568,106 @@
   .foot__nav a { @apply text-field-muted no-underline hover:text-field-ink hover:underline hover:underline-offset-4; }
   .foot :focus-visible { outline-color: var(--color-field-ink); }
   .foot__sep { @apply h-px w-full bg-field-ink/15; }
+
+  /* the motion switch. Hidden in the markup and revealed by app.js only when the
+     device asks for reduced motion, so it never appears for people who did not. */
+  .foot__motion {
+    @apply col-span-12 mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[12px] text-field-muted;
+  }
+  .foot__motion button {
+    @apply cursor-pointer rounded-[2px] border border-field-ink/35 px-2.5 py-1 text-[12px]
+           font-semibold text-field-ink transition-colors duration-200;
+  }
+  .foot__motion button:hover { @apply border-field-ink bg-field-ink/10; }
+  .foot__motion button:focus-visible { outline-color: var(--color-field-ink); }
 }
 
-/* -------------------------------------------------------------- reveals
-   Hidden states exist only under `html.anim`, which app.js adds once its
-   observers are live. No script, a slow script or a broken script leaves a
-   complete page. */
+/* --------------------------------------------------------- motion layer
+   Motion is gated by a class on <html>, not by a media query. An inline script in
+   <head> sets `.motion-on` or `.motion-off` before the first paint, defaulting to
+   the device preference, and the footer offers a switch when the device asked for
+   less motion. A media query can only be honoured or ignored; a class can also be
+   undone by the visitor who asked for it.
 
-@media (prefers-reduced-motion: no-preference) {
-  .js.fonts .hero-line {
-    transform: translateY(105%);
-    animation: var(--animate-line-up);
-    animation-delay: calc(var(--i, 0) * 110ms + 120ms);
-  }
+   Hidden states additionally live behind `html.anim`, which app.js adds once its
+   observers are live. No script, a slow script or a broken one leaves a complete
+   page. */
 
-  .js.fonts [data-load] {
-    opacity: 0;
-    transform: translateY(14px);
-    animation: var(--animate-load-rise);
-    animation-delay: var(--d, 0ms);
-  }
-
-  .js.fonts .hero-clock {
-    transform: translateY(-0.045em) scale(0.92);
-    opacity: 0;
-    animation: var(--animate-clock-land);
-    animation-delay: 620ms;
-  }
-
-  .anim [data-reveal] {
-    opacity: 0;
-    transform: translateY(22px);
-    transition:
-      opacity 700ms var(--ease-out) var(--d, 0ms),
-      transform 900ms var(--ease-out) var(--d, 0ms);
-  }
-  .anim [data-reveal].is-in { opacity: 1; transform: none; }
-  .anim [data-reveal][data-lines] { transform: none; }
-
-  .anim [data-lines] .lines__row > span {
-    transform: translateY(104%);
-    transition: transform 950ms var(--ease-expo) calc(var(--i, 0) * 90ms + 60ms);
-  }
-  .anim [data-lines].is-in .lines__row > span { transform: none; }
-
-  .anim [data-stagger] > * {
-    opacity: 0;
-    transform: translateY(16px);
-    transition: opacity 620ms var(--ease-out), transform 760ms var(--ease-out);
-  }
-  .anim [data-stagger].is-in > * {
-    opacity: 1;
-    transform: none;
-    transition-delay: calc(var(--i, 0) * 70ms);
-  }
-
-  .roll__track { transition: transform 1100ms var(--ease-expo) calc(var(--i, 0) * 65ms); }
-  .clock .roll__track { transition-duration: 620ms; }
-
-  .band-track {
-    animation: var(--animate-band);
-    animation-play-state: var(--band-state, running);
-  }
-  .band:hover, .band.is-off { --band-state: paused; }
-
-  .anim .map__route { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1100ms var(--ease-inout) 420ms; }
-  .anim .map__route-tip { stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; transition: stroke-dashoffset 300ms var(--ease-out) 1350ms, opacity 200ms linear 1350ms; }
-  .anim .map.is-in .map__route { stroke-dashoffset: 0; }
-  .anim .map.is-in .map__route-tip { stroke-dashoffset: 0; opacity: 1; }
-  .anim .map.is-in .map__marker-halo {
-    animation: halo 900ms var(--ease-out) 1350ms 1 both;
-  }
-
+.motion-on .js.fonts .hero-line {
+  transform: translateY(105%);
+  animation: var(--animate-line-up);
+  animation-delay: calc(var(--i, 0) * 110ms + 120ms);
 }
 
-/* ------------------------------------------------------------- reduced */
-
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-
-  /* Selectors carry the same weight as the rules that hide them, or the hidden
-     state wins and nothing ever appears. */
-  .js.fonts .hero-line,
-  .js.fonts [data-load],
-  .js.fonts .hero-clock {
-    animation: none !important;
-    transform: none !important;
-    opacity: 1 !important;
-  }
-  .js.fonts .hero-clock { transform: translateY(-0.045em) !important; }
-
-  .anim [data-reveal],
-  .anim [data-stagger] > *,
-  .anim [data-lines] .lines__row > span {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-  }
-
-  .roll__track { transition: none; }
-  .band-track { animation: none; }
-  .anim .map__route, .anim .map__route-tip { stroke-dashoffset: 0; opacity: 1; transition: none; }
-  .anim .map.is-in .map__marker-halo { animation: none; }
-  .btn, .btn:active, .wordmark:hover .mark, .card:hover .card__arrow { transform: none; }
+.motion-on .js.fonts [data-load] {
+  opacity: 0;
+  transform: translateY(14px);
+  animation: var(--animate-load-rise);
+  animation-delay: var(--d, 0ms);
 }
+
+.motion-on .js.fonts .hero-clock {
+  transform: translateY(-0.045em) scale(0.92);
+  opacity: 0;
+  animation: var(--animate-clock-land);
+  animation-delay: 620ms;
+}
+
+.motion-on .anim [data-reveal] {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 700ms var(--ease-out) var(--d, 0ms),
+    transform 900ms var(--ease-out) var(--d, 0ms);
+}
+.motion-on .anim [data-reveal].is-in { opacity: 1; transform: none; }
+.motion-on .anim [data-reveal][data-lines] { transform: none; }
+
+.motion-on .anim [data-lines] .lines__row > span {
+  transform: translateY(104%);
+  transition: transform 950ms var(--ease-expo) calc(var(--i, 0) * 90ms + 60ms);
+}
+.motion-on .anim [data-lines].is-in .lines__row > span { transform: none; }
+
+.motion-on .anim [data-stagger] > * {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 620ms var(--ease-out), transform 760ms var(--ease-out);
+}
+.motion-on .anim [data-stagger].is-in > * {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+
+.motion-on .roll__track { transition: transform 1100ms var(--ease-expo) calc(var(--i, 0) * 65ms); }
+.motion-on .clock .roll__track { transition-duration: 620ms; }
+
+/* The band never pauses on hover: it is full-bleed, so a mouse resting anywhere
+   across the page freezes it and the page reads as broken. It still stops the
+   moment it leaves the viewport. */
+.motion-on .band-track {
+  animation: var(--animate-band);
+  animation-play-state: var(--band-state, running);
+  will-change: transform;
+}
+.motion-on .band.is-off { --band-state: paused; }
+
+.motion-on .anim .map__route { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1100ms var(--ease-inout) 420ms; }
+.motion-on .anim .map__route-tip { stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; transition: stroke-dashoffset 300ms var(--ease-out) 1350ms, opacity 200ms linear 1350ms; }
+.motion-on .anim .map.is-in .map__route { stroke-dashoffset: 0; }
+.motion-on .anim .map.is-in .map__route-tip { stroke-dashoffset: 0; opacity: 1; }
+.motion-on .anim .map.is-in .map__marker-halo {
+  animation: halo 900ms var(--ease-out) 1350ms 1 both;
+}
+
+/* ------------------------------------------------------------- less motion
+   Nothing is hidden, so no missing observer can strand a section; the two shape
+   changes that are decoration on hover or press are dropped as well. */
+
+.motion-off .btn:active,
+.motion-off .wordmark:hover .mark,
+.motion-off .card:hover .card__arrow { transform: none; }
 
 @media print {
   .anim [data-reveal], .anim [data-stagger] > *, .js.fonts .hero-line, .js.fonts [data-load] {

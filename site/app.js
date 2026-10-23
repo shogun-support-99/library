@@ -10,7 +10,6 @@
   "use strict";
 
   var root = document.documentElement;
-  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var hasIO = "IntersectionObserver" in window;
 
   /* ---------------------------------------------------------------- helpers */
@@ -296,31 +295,67 @@
       // Both header states are computed from the scroll position on each frame.
       // An IntersectionObserver would only fire when the relationship *changes*,
       // which leaves a stale colour once the page is scrolled back up.
+      //
+      // Everything measurable is measured once and cached: reading offsetHeight
+      // inside the scroll handler forces a layout on every frame, which is what
+      // makes a long page stutter on a laptop. The cache is refreshed when the
+      // document actually changes size (a FAQ opening, the viewport turning).
       var dark = document.querySelector(".close");
       var ticking = false;
+      var headerH = 0;
+      var darkTop = 0;
+      var darkH = 0;
+      var wasStuck = null;
+      var wasDark = null;
 
-      var onScroll = function () {
-        header.classList.toggle("is-stuck", window.scrollY > 8);
+      var measure = function () {
+        headerH = header.offsetHeight;
         if (dark) {
-          var top = dark.getBoundingClientRect().top;
-          var h = header.offsetHeight;
-          header.classList.toggle("is-dark", top <= h && top > -dark.offsetHeight);
+          darkTop = dark.getBoundingClientRect().top + window.scrollY;
+          darkH = dark.offsetHeight;
         }
-        ticking = false;
       };
 
-      window.addEventListener(
-        "scroll",
-        function () {
-          if (ticking) return;
-          ticking = true;
-          window.requestAnimationFrame(onScroll);
-        },
-        { passive: true }
-      );
+      var paint = function () {
+        ticking = false;
+        var y = window.scrollY;
 
-      window.addEventListener("resize", onScroll, { passive: true });
-      onScroll();
+        var stuck = y > 8;
+        if (stuck !== wasStuck) {
+          header.classList.toggle("is-stuck", stuck);
+          wasStuck = stuck;
+        }
+
+        if (dark) {
+          var top = darkTop - y;
+          var isDark = top <= headerH && top > -darkH;
+          if (isDark !== wasDark) {
+            header.classList.toggle("is-dark", isDark);
+            wasDark = isDark;
+          }
+        }
+      };
+
+      var onScroll = function () {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(paint);
+      };
+
+      var remeasure = function () {
+        measure();
+        onScroll();
+      };
+
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", remeasure, { passive: true });
+
+      if ("ResizeObserver" in window) {
+        new ResizeObserver(remeasure).observe(document.body);
+      }
+
+      measure();
+      paint();
     }
 
     // 6. The band stops moving when it is off screen.
@@ -353,7 +388,51 @@
       });
     }
 
-    // 8. Safety net. If nothing has revealed itself a few seconds in, something
+    // 8. The motion switch. A device can ask for less motion, and a media query
+    //    can only be obeyed or ignored: this gives the visitor the choice back,
+    //    without a reload. Hidden in the markup, revealed here, so it is never a
+    //    dead control when the script does not run.
+    var motionWrap = document.querySelector("[data-motion]");
+    var motionBtn = motionWrap && motionWrap.querySelector("[data-motion-toggle]");
+    if (motionWrap && motionBtn) {
+      var mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      var motionText = motionWrap.querySelector("[data-motion-text]");
+
+      var motionOn = function () {
+        return root.classList.contains("motion-on");
+      };
+
+      var syncSwitch = function () {
+        var on = motionOn();
+        motionBtn.textContent = on ? "Turn them off" : "Turn them on";
+        motionBtn.setAttribute("aria-pressed", on ? "true" : "false");
+        if (motionText) {
+          motionText.textContent = on
+            ? "Animations are on."
+            : mq.matches
+              ? "Animations are off to match your device."
+              : "Animations are off.";
+        }
+        motionWrap.hidden = false;
+      };
+
+      motionBtn.addEventListener("click", function () {
+        var next = motionOn() ? "off" : "on";
+        root.classList.remove("motion-on", "motion-off");
+        root.classList.add("motion-" + next);
+        try {
+          localStorage.setItem("arsl-motion", next);
+        } catch (err) {
+          /* private mode: the choice lasts for this page only */
+        }
+        syncSwitch();
+      });
+
+      if (mq.addEventListener) mq.addEventListener("change", syncSwitch);
+      syncSwitch();
+    }
+
+    // 9. Safety net. If nothing has revealed itself a few seconds in, something
     //    upstream is broken: drop the gate and settle the figures, so the page
     //    is a complete static page rather than a blank one.
     window.setTimeout(function () {
